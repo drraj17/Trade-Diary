@@ -1,0 +1,2769 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#090d16" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Trade Diary" />
+  <meta name="description" content="Indian Trading & Investment Journal — Live CMP & MF NAV, FIFO Auto-Matching, Bond Interest Tracker, and Multi-Device GitHub Gist Sync" />
+  <title>Trade Diary India</title>
+
+  <!-- Google Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+
+    /* Unified Document Scroll Flow — No nested scroll traps or body locks */
+    html {
+      background-color: #090d16;
+      color: #f8fafc;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      background-color: #090d16;
+      color: #f8fafc;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      overflow-y: visible;
+      touch-action: pan-y;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    main {
+      flex: 1 1 auto;
+      min-height: 0;
+      touch-action: pan-y;
+      padding-bottom: calc(96px + env(safe-area-inset-bottom, 16px));
+    }
+
+    @media (min-width: 769px) {
+      main {
+        padding-bottom: 2.5rem;
+      }
+    }
+
+    /* Ensure vertical swipe gestures never snag on cards or buttons */
+    .scroll-friendly,
+    #tdi-main-pos-list,
+    #tdi-mobile-cards,
+    #tdi-desktop-tbody {
+      touch-action: pan-y;
+    }
+
+    /* Prevent mobile browser auto-zoom on form fields */
+    input, select, textarea {
+      font-size: 16px !important;
+    }
+    @media (min-width: 769px) {
+      input, select, textarea {
+        font-size: 13px !important;
+      }
+    }
+
+    /* Safe-area helpers */
+    .header-safe {
+      padding-top: calc(0.6rem + env(safe-area-inset-top, 0px));
+    }
+    .bottom-nav-safe {
+      padding-bottom: calc(0.45rem + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* Spinner animation */
+    @keyframes tdi-spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin-fast {
+      animation: tdi-spin 0.85s linear infinite;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090d16;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+  </style>
+</head>
+<body class="bg-[#090d16] text-slate-50 antialiased selection:bg-sky-500/30 selection:text-sky-200">
+
+  <!-- ==================== STICKY TOP HEADER ==================== -->
+  <header class="sticky top-0 z-40 header-safe bg-gradient-to-r from-[#0f172a]/95 via-[#172033]/95 to-[#0f172a]/95 backdrop-blur-md border-b border-slate-800 px-3 sm:px-6 py-2.5">
+    <div class="max-w-6xl mx-auto flex items-center justify-between gap-2">
+      <!-- Brand + Live Status Pill -->
+      <div class="flex items-center gap-2 min-w-0">
+        <span class="text-lg shrink-0" aria-hidden="true">🇮🇳</span>
+        <h1 class="font-extrabold text-sm sm:text-base tracking-tight bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent truncate">
+          Trade Diary India
+        </h1>
+        <span id="tdi-status" class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-sky-400 truncate max-w-[130px] sm:max-w-[220px]">
+          Ready
+        </span>
+      </div>
+
+      <!-- Desktop Tabs (>= 769px) -->
+      <nav class="hidden md:flex items-center gap-1 bg-[#090d16] p-1 rounded-xl border border-slate-800" aria-label="Desktop Navigation">
+        <button type="button" data-tab="main" class="tdi-tab-desktop px-3.5 py-1.5 rounded-lg text-xs font-bold transition bg-gradient-to-r from-sky-600 to-indigo-600 text-white shadow">
+          Main
+        </button>
+        <button type="button" data-tab="trades" class="tdi-tab-desktop px-3.5 py-1.5 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200">
+          Trades (<span class="tdi-tab-count">0</span>)
+        </button>
+        <button type="button" data-tab="settings" class="tdi-tab-desktop px-3.5 py-1.5 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200">
+          Settings
+        </button>
+      </nav>
+
+      <!-- Action Icon Buttons -->
+      <div class="flex items-center gap-1.5 shrink-0">
+        <!-- Toggle Entry Form (+) -->
+        <button type="button" id="tdi-entry-toggle" title="Toggle Entry Form"
+          class="px-3 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-extrabold text-sm leading-none shadow-md shadow-sky-500/20 transition active:scale-95">
+          +
+        </button>
+
+        <!-- Refresh CMP/NAV -->
+        <button type="button" id="tdi-refresh-cmp" title="Fetch Live / EOD Prices"
+          class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition active:scale-95">
+          <svg id="tdi-refresh-icon" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          </svg>
+        </button>
+
+        <!-- Filter Toggle -->
+        <button type="button" id="tdi-filter-toggle" title="Filters"
+          class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition active:scale-95">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+          </svg>
+        </button>
+
+        <!-- Cloud Sync Backup -->
+        <button type="button" id="tdi-cloud-btn" title="Cloud Sync Backup"
+          class="relative p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition active:scale-95">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/><polyline points="12 13 12 17"/><polyline points="10 15 12 13 14 15"/>
+          </svg>
+          <span id="tdi-unsynced-dot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-orange-500 ring-2 ring-[#090d16]"></span>
+        </button>
+
+        <!-- Settings Gear -->
+        <button type="button" id="tdi-settings-btn" title="Settings"
+          class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition active:scale-95">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== MULTI-DEVICE REMOTE UPDATE BANNER ==================== -->
+  <div id="tdi-sync-popup" class="hidden bg-gradient-to-r from-indigo-950 via-sky-950 to-indigo-950 border-b border-sky-500/40 px-3 sm:px-6 py-2.5">
+    <div class="max-w-6xl mx-auto flex items-center justify-between gap-2 flex-wrap">
+      <span id="tdi-sync-popup-msg" class="text-xs font-semibold text-sky-100">
+        ☁️ Newer backup found from another device.
+      </span>
+      <div class="flex items-center gap-2">
+        <button type="button" id="tdi-load-latest-btn" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-bold text-xs shadow">
+          Load Latest
+        </button>
+        <button type="button" id="tdi-dismiss-sync-btn" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs">
+          ✕
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MAIN SCROLLABLE CONTENT ==================== -->
+  <main class="max-w-6xl w-full mx-auto px-3 sm:px-6 pt-3.5 space-y-3.5">
+
+    <!-- ==================== COLLAPSIBLE FILTER BAR (SYNCED) ==================== -->
+    <section id="tdi-filterbar" class="hidden bg-[#111827] border border-sky-500/40 rounded-2xl p-3 shadow-lg">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+        <input id="f-query" type="text" placeholder="🔍 Symbol / note..." autocomplete="off"
+          class="col-span-2 sm:col-span-2 lg:col-span-1 bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 font-semibold placeholder-slate-500 outline-none" />
+        <select id="f-year" class="bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-2.5 py-2 text-slate-100 font-semibold outline-none">
+          <option value="all">All Years</option>
+        </select>
+        <select id="f-month" class="bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-2.5 py-2 text-slate-100 font-semibold outline-none"></select>
+        <select id="f-seg" class="bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-2.5 py-2 text-slate-100 font-semibold outline-none"></select>
+        <select id="f-broker" class="bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-2.5 py-2 text-slate-100 font-semibold outline-none"></select>
+        <select id="f-side" class="bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-2.5 py-2 text-slate-100 font-semibold outline-none">
+          <option value="all">Buy &amp; Sell</option>
+          <option value="BUY">Buy</option>
+          <option value="SELL">Sell</option>
+        </select>
+        <select id="f-style" class="bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-2.5 py-2 text-slate-100 font-semibold outline-none">
+          <option value="all">Intraday &amp; Long</option>
+          <option value="INTRADAY">Intraday</option>
+          <option value="POSITIONAL">Long</option>
+        </select>
+        <select id="f-status" class="bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-2.5 py-2 text-slate-100 font-semibold outline-none">
+          <option value="all">All Status</option>
+          <option value="open">Open</option>
+          <option value="closed">Closed</option>
+        </select>
+        <select id="f-outcome" class="bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-2.5 py-2 text-slate-100 font-semibold outline-none">
+          <option value="all">All Results</option>
+          <option value="win">Win</option>
+          <option value="loss">Loss</option>
+        </select>
+        <button type="button" id="f-reset" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs transition">
+          Reset
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 1: MAIN ==================== -->
+    <div id="view-main" class="tdi-view space-y-3.5">
+
+      <!-- Top 5-Metric Profit & Capital Banner -->
+      <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 p-3 sm:p-4 rounded-2xl bg-gradient-to-br from-[#0f172a] to-[#132a2e] border border-sky-500/30 shadow-lg">
+        <div>
+          <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Realized Profit</div>
+          <div id="pb-main-profit" class="text-sm sm:text-base font-extrabold mt-0.5 text-[#34d399]">₹0.00</div>
+        </div>
+        <div>
+          <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Live P&amp;L (EOD)</div>
+          <div id="pb-main-live" class="text-sm sm:text-base font-extrabold mt-0.5 text-[#34d399]">₹0.00</div>
+        </div>
+        <div>
+          <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Open Capital</div>
+          <div id="pb-main-cap" class="text-sm sm:text-base font-extrabold mt-0.5 text-amber-400">₹0.00</div>
+        </div>
+        <div>
+          <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Win Rate</div>
+          <div id="pb-main-win" class="text-sm sm:text-base font-extrabold mt-0.5 text-blue-400">0% (0W/0L)</div>
+        </div>
+        <div class="col-span-2 sm:col-span-1">
+          <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Charges &amp; STT</div>
+          <div id="pb-main-fees" class="text-sm sm:text-base font-extrabold mt-0.5 text-pink-400">₹0.00</div>
+        </div>
+      </section>
+
+      <!-- 5-Card Capital Breakdown + Bond Interest Strip -->
+      <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+        <div class="p-3 rounded-xl bg-[#111827] border border-slate-800 border-t-[3px] border-t-[#38bdf8]">
+          <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Stocks</div>
+          <div id="cap-stocks" class="text-sm font-extrabold mt-0.5 text-[#38bdf8]">₹0.00</div>
+        </div>
+        <div class="p-3 rounded-xl bg-[#111827] border border-slate-800 border-t-[3px] border-t-purple-500">
+          <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Mutual Funds</div>
+          <div id="cap-mf" class="text-sm font-extrabold mt-0.5 text-purple-400">₹0.00</div>
+        </div>
+        <div class="p-3 rounded-xl bg-[#111827] border border-slate-800 border-t-[3px] border-t-emerald-500">
+          <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">ETF</div>
+          <div id="cap-etf" class="text-sm font-extrabold mt-0.5 text-emerald-400">₹0.00</div>
+        </div>
+        <div class="p-3 rounded-xl bg-[#111827] border border-slate-800 border-t-[3px] border-t-amber-500">
+          <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Bonds</div>
+          <div id="cap-bonds" class="text-sm font-extrabold mt-0.5 text-amber-400">₹0.00</div>
+        </div>
+        <div class="col-span-2 sm:col-span-1 p-3 rounded-xl bg-gradient-to-br from-[#111827] to-[#291d05] border border-slate-800 border-t-[3px] border-t-yellow-500">
+          <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Bond Interest</div>
+          <div id="cap-interest" class="text-sm font-extrabold mt-0.5 text-yellow-300">₹0.00</div>
+        </div>
+      </section>
+
+      <!-- Collapsible Trade / Investment Entry Box -->
+      <section id="tdi-form-box" class="hidden bg-[#111827] border border-sky-500/40 rounded-2xl p-3.5 space-y-3 shadow-xl">
+        <!-- Open Qty Reminder Pill -->
+        <div id="tdi-open-reminder" class="hidden items-center justify-between flex-wrap gap-2 px-3 py-2 rounded-xl bg-sky-950/70 border border-sky-500/40 text-sky-100 text-xs font-semibold">
+          <span id="tdi-reminder-text"></span>
+          <button type="button" id="tdi-reminder-sell" class="px-2.5 py-1 rounded-lg bg-rose-900 hover:bg-rose-800 border border-rose-500 text-rose-50 font-extrabold text-xs">
+            S
+          </button>
+        </div>
+
+        <form id="tdi-trade-form" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5">
+          <div class="flex flex-col gap-1">
+            <label class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Date</label>
+            <input id="t-date" type="date" required class="w-full bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 outline-none" />
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Symbol</label>
+            <input id="t-sym" type="text" placeholder="Symbol..." required autocomplete="off"
+              class="w-full bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 uppercase outline-none" />
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Category</label>
+            <select id="t-seg" class="w-full bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 outline-none"></select>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Broker</label>
+            <select id="t-broker" class="w-full bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 outline-none"></select>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Side</label>
+            <select id="t-side" class="w-full bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 font-bold outline-none">
+              <option value="BUY">Buy</option>
+              <option value="SELL">Sell</option>
+            </select>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Type</label>
+            <select id="t-style" class="w-full bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 outline-none">
+              <option value="POSITIONAL">Long</option>
+              <option value="INTRADAY">Intraday</option>
+            </select>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label id="lbl-qty" class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Qty</label>
+            <input id="t-qty" type="number" step="any" placeholder="Qty" required
+              class="w-full bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 outline-none" />
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label id="lbl-entry" class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Buy ₹</label>
+            <input id="t-entry" type="number" step="any" placeholder="Price ₹" required
+              class="w-full bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 outline-none" />
+          </div>
+
+          <div id="wrap-interest" class="hidden flex-col gap-1">
+            <label class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Interest (%)</label>
+            <input id="t-interest" type="number" step="any" placeholder="e.g. 9.5"
+              class="w-full bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 outline-none" />
+          </div>
+
+          <div id="wrap-exit" class="flex flex-col gap-1">
+            <label id="lbl-exit" class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Exit ₹</label>
+            <input id="t-exit" type="number" step="any" placeholder="Optional"
+              class="w-full bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 outline-none" />
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Fees ₹</label>
+            <input id="t-fees" type="number" step="any" placeholder="0" value="0"
+              class="w-full bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 outline-none" />
+          </div>
+
+          <div id="wrap-notes" class="flex flex-col gap-1 sm:col-span-2 md:col-span-2">
+            <label class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Notes</label>
+            <input id="t-notes" type="text" placeholder="Notes..."
+              class="w-full bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 outline-none" />
+          </div>
+
+          <div class="sm:col-span-2 md:col-span-4 flex items-center justify-between gap-2 pt-1">
+            <button type="button" id="tdi-open-int-btn" class="hidden px-3 py-2 rounded-xl bg-amber-900/80 hover:bg-amber-800 border border-amber-500 text-amber-100 font-bold text-xs">
+              + Interest
+            </button>
+            <div class="flex items-center gap-2 ml-auto">
+              <button type="button" id="tdi-form-cancel" class="hidden px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs">
+                Cancel
+              </button>
+              <button type="submit" id="tdi-form-submit" class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-bold text-xs shadow">
+                + Save
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Bond Interest Quick Entry Box -->
+        <div id="tdi-interest-box" class="hidden bg-stone-900 border border-amber-500/40 rounded-xl p-3 flex-wrap items-end gap-2.5">
+          <div class="flex flex-col gap-1 flex-1 min-w-[130px]">
+            <label id="int-box-title" class="text-[10px] text-amber-300 font-bold uppercase tracking-wider">Date</label>
+            <input id="int-date" type="date" class="w-full bg-[#090d16] border border-slate-700 rounded-xl px-3 py-2 text-slate-100 outline-none" />
+          </div>
+          <div class="flex flex-col gap-1 flex-1 min-w-[130px]">
+            <label class="text-[10px] text-amber-300 font-bold uppercase tracking-wider">Interest Amount ₹</label>
+            <input id="int-amount" type="number" step="any" placeholder="Amount ₹" class="w-full bg-[#090d16] border border-slate-700 rounded-xl px-3 py-2 text-slate-100 outline-none" />
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" id="int-save-btn" class="px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 text-white font-bold text-xs">
+              Save Interest
+            </button>
+            <button type="button" id="int-cancel-btn" class="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">
+              ✕
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Open Positions / Symbol History (Unified Document Flow — No nested max-height scroll trap) -->
+      <section class="bg-[#111827] border border-slate-800 rounded-2xl p-3 sm:p-4 space-y-2.5 shadow-md">
+        <div class="flex items-center justify-between text-xs font-extrabold text-[#38bdf8]">
+          <span id="tdi-main-list-title">📌 Open Positions</span>
+          <span id="tdi-main-list-sub" class="text-[11px] text-slate-400 font-semibold">0</span>
+        </div>
+        <div id="tdi-main-pos-list" class="flex flex-col gap-2.5"></div>
+      </section>
+    </div>
+
+    <!-- ==================== TAB 2: TRADES ==================== -->
+    <div id="view-trades" class="tdi-view hidden space-y-3.5">
+      <!-- Trades 4-Metric Banner -->
+      <section class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-3 sm:p-4 rounded-2xl bg-gradient-to-br from-[#0f172a] to-[#132a2e] border border-sky-500/30 shadow-lg">
+        <div>
+          <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Filtered Profit</div>
+          <div id="pb-trd-profit" class="text-sm sm:text-base font-extrabold mt-0.5 text-[#34d399]">₹0.00</div>
+        </div>
+        <div>
+          <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Open Capital</div>
+          <div id="pb-trd-cap" class="text-sm sm:text-base font-extrabold mt-0.5 text-amber-400">₹0.00</div>
+        </div>
+        <div>
+          <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Win Rate</div>
+          <div id="pb-trd-win" class="text-sm sm:text-base font-extrabold mt-0.5 text-blue-400">0% (0W/0L)</div>
+        </div>
+        <div>
+          <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Trades</div>
+          <div id="pb-trd-count" class="text-sm sm:text-base font-extrabold mt-0.5 text-purple-400">0</div>
+        </div>
+      </section>
+
+      <!-- Desktop Table (>= 769px) -->
+      <div class="hidden md:block overflow-x-auto border border-slate-800 rounded-2xl bg-[#111827] shadow-md">
+        <table class="w-full border-collapse text-left text-xs min-w-[820px]">
+          <thead>
+            <tr class="bg-slate-800 text-slate-400 font-bold">
+              <th class="py-2.5 px-3">Date</th>
+              <th class="py-2.5 px-3">Symbol</th>
+              <th class="py-2.5 px-3">Category</th>
+              <th class="py-2.5 px-3">Broker</th>
+              <th class="py-2.5 px-3">Side</th>
+              <th class="py-2.5 px-3">Type</th>
+              <th class="py-2.5 px-3">Qty</th>
+              <th class="py-2.5 px-3">Entry</th>
+              <th class="py-2.5 px-3">Exit / Int</th>
+              <th class="py-2.5 px-3">Fees</th>
+              <th class="py-2.5 px-3">Net P&amp;L</th>
+              <th class="py-2.5 px-3">Notes</th>
+              <th class="py-2.5 px-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tdi-desktop-tbody" class="divide-y divide-slate-800"></tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Trade Cards (<= 768px — Unified Document Flow, No nested scroll trap) -->
+      <div id="tdi-mobile-cards" class="md:hidden flex flex-col gap-2.5"></div>
+    </div>
+
+    <!-- ==================== TAB 3: SETTINGS ==================== -->
+    <div id="view-settings" class="tdi-view hidden space-y-3.5">
+      <div class="flex items-center justify-between">
+        <span class="font-extrabold text-sm sm:text-base text-slate-50">Settings &amp; Databases</span>
+        <button type="button" id="tdi-back-main" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 text-white font-bold text-xs shadow">
+          ← Back
+        </button>
+      </div>
+
+      <!-- Categories -->
+      <section class="bg-[#111827] border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
+        <div class="flex items-center justify-between font-bold text-xs text-[#38bdf8]">
+          <span>📂 Categories</span>
+          <button type="button" id="seg-reset-btn" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-[11px]">
+            Reset
+          </button>
+        </div>
+        <div class="flex gap-2">
+          <input id="seg-new-name" type="text" placeholder="Add category..."
+            class="flex-1 min-w-0 bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 outline-none" />
+          <button type="button" id="seg-add-btn" class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 text-white font-bold text-xs shrink-0">
+            + Add
+          </button>
+        </div>
+        <div id="set-seg-list" class="flex flex-wrap gap-2"></div>
+      </section>
+
+      <!-- Brokers -->
+      <section class="bg-[#111827] border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
+        <div class="flex items-center justify-between font-bold text-xs text-[#38bdf8]">
+          <span>🏦 Brokers (<span id="set-brk-count">0</span>)</span>
+        </div>
+        <div class="flex gap-2">
+          <input id="brk-new-name" type="text" placeholder="Add broker..."
+            class="flex-1 min-w-0 bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 outline-none" />
+          <button type="button" id="brk-add-btn" class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 text-white font-bold text-xs shrink-0">
+            + Add
+          </button>
+        </div>
+        <div id="set-brk-list" class="flex flex-wrap gap-2"></div>
+      </section>
+
+      <!-- Symbol Database & AMFI / CMP -->
+      <section class="bg-[#111827] border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
+        <div class="flex items-center justify-between font-bold text-xs text-[#38bdf8]">
+          <span>📌 Symbol Database &amp; AMFI / CMP (<span id="set-sym-count">0</span>)</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
+          <input id="sym-new-name" type="text" placeholder="RELIANCE, PARAG..."
+            class="sm:col-span-1 bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 uppercase outline-none" />
+          <select id="sym-new-seg" class="bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 outline-none"></select>
+          <input id="sym-new-code" type="text" placeholder="MF Code / .BO (opt)"
+            class="bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 outline-none" />
+          <button type="button" id="sym-add-btn" class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 text-white font-bold text-xs">
+            + Add
+          </button>
+        </div>
+        <div id="set-sym-list" class="flex flex-wrap gap-2"></div>
+      </section>
+
+      <!-- GitHub Gist Sync -->
+      <section class="bg-[#111827] border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
+        <div class="flex items-center justify-between flex-wrap gap-2 font-bold text-xs text-[#38bdf8]">
+          <span>☁️ GitHub Gist Sync</span>
+          <div class="flex gap-2">
+            <button type="button" id="gist-pull-btn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs">
+              ⬇️ Pull
+            </button>
+            <button type="button" id="gist-push-btn" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 text-white font-bold text-xs">
+              ⬆️ Push
+            </button>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <input id="gh-token" type="password" placeholder="GitHub Token"
+            class="bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 outline-none" />
+          <input id="gh-gist-id" type="text" placeholder="Gist ID"
+            class="bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 outline-none" />
+        </div>
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <button type="button" id="gh-save-btn" class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 text-white font-bold text-xs">
+            Save
+          </button>
+          <span id="tdi-last-sync-lbl" class="text-[11px] text-slate-400"></span>
+        </div>
+      </section>
+
+      <!-- Backup & Restore -->
+      <section class="bg-[#111827] border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
+        <div class="font-bold text-xs text-[#38bdf8]">💾 Backup &amp; Restore</div>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" id="data-copy-btn" class="px-3 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 text-white font-bold text-xs">
+            📋 Copy JSON
+          </button>
+          <button type="button" id="data-download-btn" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs">
+            ⬇️ Download
+          </button>
+          <button type="button" id="data-file-btn" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs">
+            📁 Import File
+          </button>
+          <input type="file" id="data-file-input" accept=".json,application/json" class="hidden" />
+          <button type="button" id="data-wipe-btn" class="px-3 py-2 rounded-xl bg-red-900 hover:bg-red-800 border border-red-600 text-white font-bold text-xs">
+            🗑️ Wipe All
+          </button>
+        </div>
+        <textarea id="data-textarea" rows="3" placeholder="Paste JSON backup..."
+          class="w-full bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl p-2.5 text-slate-100 outline-none"></textarea>
+        <button type="button" id="data-paste-btn" class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 text-white font-bold text-xs">
+          📥 Restore
+        </button>
+      </section>
+    </div>
+  </main>
+
+  <!-- ==================== MOBILE BOTTOM NAVIGATION BAR (<= 768px) ==================== -->
+  <nav class="md:hidden fixed bottom-0 inset-x-0 z-40 bottom-nav-safe bg-[#0f172a]/95 backdrop-blur-md border-t border-slate-800 px-3 pt-1.5 flex items-center justify-around" aria-label="Mobile Navigation">
+    <button type="button" data-tab="main" class="tdi-tab-mobile flex flex-col items-center gap-0.5 py-1.5 px-4 text-sky-400 font-bold text-[11px]">
+      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+      <span>Main</span>
+    </button>
+
+    <!-- Centered Elevated + Button -->
+    <button type="button" id="tdi-mobile-fab" title="Add Entry"
+      class="-mt-6 w-14 h-14 rounded-full bg-gradient-to-br from-sky-500 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-sky-500/40 border-4 border-[#090d16] active:scale-95 transition">
+      <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+    </button>
+
+    <button type="button" data-tab="trades" class="tdi-tab-mobile flex flex-col items-center gap-0.5 py-1.5 px-4 text-slate-400 font-semibold text-[11px]">
+      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <span>Trades (<span class="tdi-tab-count">0</span>)</span>
+    </button>
+
+    <button type="button" data-tab="settings" class="tdi-tab-mobile flex flex-col items-center gap-0.5 py-1.5 px-4 text-slate-400 font-semibold text-[11px]">
+      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+  <!-- ==================== FLOATING AUTOCOMPLETE DROPDOWN ==================== -->
+  <div id="tdi-sym-dropdown" class="hidden fixed z-50 bg-slate-800 border border-sky-400 rounded-xl max-h-56 overflow-y-auto shadow-2xl text-xs text-slate-50 divide-y divide-slate-700"></div>
+
+  <!-- ==================== CUSTOM MODAL DIALOG (NO ALERT / CONFIRM) ==================== -->
+  <div id="tdi-dialog-overlay" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-[#111827] border border-slate-700 rounded-2xl p-4 space-y-3 shadow-2xl">
+      <h2 id="tdi-dlg-title" class="text-sm font-extrabold text-slate-50">Confirm</h2>
+      <p id="tdi-dlg-msg" class="text-xs text-slate-300 leading-relaxed"></p>
+      <input id="tdi-dlg-input" type="text" class="hidden w-full bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 outline-none" />
+      <div class="flex justify-end gap-2 pt-1">
+        <button type="button" id="tdi-dlg-cancel" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">Cancel</button>
+        <button type="button" id="tdi-dlg-ok" class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 text-white font-bold text-xs">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // ── PWA Manifest Injection ───────────────────────────────────────────
+      try {
+        const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0ea5e9"/><stop offset="100%" stop-color="#6366f1"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#g)"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="220" fill="#ffffff">TD</text></svg>`;
+        const iconUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(iconSvg);
+        const manifest = {
+          name: 'Trade Diary India',
+          short_name: 'Trade Diary',
+          description: 'Indian trading & investment journal — Live CMP & MF NAV, Unrealized Live P&L, multi-device Gist sync',
+          start_url: '.',
+          display: 'standalone',
+          background_color: '#090d16',
+          theme_color: '#090d16',
+          icons: [
+            { src: iconUrl, sizes: '192x192', type: 'image/svg+xml' },
+            { src: iconUrl, sizes: '512x512', type: 'image/svg+xml' }
+          ]
+        };
+        const blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = URL.createObjectURL(blob);
+        document.head.appendChild(link);
+      } catch (e) {}
+
+      // ── LocalStorage Persistence Helpers ─────────────────────────────────
+      const lsGet = (key, fallback) => {
+        try {
+          const raw = localStorage.getItem(key);
+          return raw === null ? fallback : JSON.parse(raw);
+        } catch (e) {
+          return fallback;
+        }
+      };
+
+      const lsSet = (key, val) => {
+        try {
+          localStorage.setItem(key, JSON.stringify(val));
+        } catch (e) {}
+      };
+
+      // ── Constants ────────────────────────────────────────────────────────
+      const DEFAULT_SEGMENTS = ['Stocks', 'Mutual Funds', 'Bonds', 'ETF'];
+      const DEFAULT_BROKERS  = ['Zerodha', 'Groww', 'Dhan', 'Angel One', 'Upstox', 'ICICI Direct', 'HDFC Securities'];
+      const MONTHS = [
+        ['01', 'Jan'], ['02', 'Feb'], ['03', 'Mar'], ['04', 'Apr'],
+        ['05', 'May'], ['06', 'Jun'], ['07', 'Jul'], ['08', 'Aug'],
+        ['09', 'Sep'], ['10', 'Oct'], ['11', 'Nov'], ['12', 'Dec']
+      ];
+
+      // ── Device ID & State ────────────────────────────────────────────────
+      let deviceId = lsGet('tdi_device_id', '');
+      if (!deviceId) {
+        deviceId = 'dev_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now().toString(36);
+        lsSet('tdi_device_id', deviceId);
+      }
+
+      let trades        = lsGet('tdi_trades', []);
+      let bondInterests = lsGet('tdi_bond_interests', []);
+      let symbols       = lsGet('tdi_symbols', []);
+      let segments      = lsGet('tdi_segments', DEFAULT_SEGMENTS.slice());
+      let brokers       = lsGet('tdi_brokers', DEFAULT_BROKERS.slice());
+      let priceCache    = lsGet('tdi_price_cache', {});
+      let gistConfig    = lsGet('tdi_gist_config', { token: '', gistId: '' });
+      let hasUnsynced   = lsGet('tdi_unsynced', false);
+      let lastSyncedAt  = lsGet('tdi_last_synced_at', '');
+
+      if (!Array.isArray(trades)) trades = [];
+      if (!Array.isArray(bondInterests)) bondInterests = [];
+      if (!Array.isArray(symbols)) symbols = [];
+      if (!Array.isArray(segments) || !segments.length) segments = DEFAULT_SEGMENTS.slice();
+      if (!Array.isArray(brokers)) brokers = DEFAULT_BROKERS.slice();
+      if (!priceCache || typeof priceCache !== 'object') priceCache = {};
+
+      let activeTab            = 'main';
+      let editingId            = null;
+      let filtersOpen          = false;
+      let entryOpen            = false;
+      let isFetchingCmp        = false;
+      let expandedKeys         = new Set();
+      let expandedBonds        = new Set();
+      let interestModalTarget  = null;
+      let remotePendingPayload = null;
+
+      let filters = {
+        year:    lsGet('tdi_filter_year', 'all'),
+        month:   'all',
+        seg:     'all',
+        broker:  'all',
+        side:    'all',
+        style:   'all',
+        status:  'all',
+        outcome: 'all',
+        query:   ''
+      };
+
+      // ── Non-Blocking Custom Dialog (Replaces alert / confirm / prompt) ───
+      const openDialog = ({ title, message, showInput = false, defaultValue = '', confirmText = 'Confirm', isDanger = false }) => {
+        return new Promise((resolve) => {
+          const overlay = document.getElementById('tdi-dialog-overlay');
+          const elTitle = document.getElementById('tdi-dlg-title');
+          const elMsg   = document.getElementById('tdi-dlg-msg');
+          const elInput = document.getElementById('tdi-dlg-input');
+          const btnOk   = document.getElementById('tdi-dlg-ok');
+          const btnCan  = document.getElementById('tdi-dlg-cancel');
+
+          elTitle.textContent = title;
+          elMsg.textContent   = message;
+          btnOk.textContent   = confirmText;
+          btnOk.className     = isDanger
+            ? 'px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs'
+            : 'px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 text-white font-bold text-xs';
+
+          if (showInput) {
+            elInput.classList.remove('hidden');
+            elInput.value = defaultValue;
+          } else {
+            elInput.classList.add('hidden');
+            elInput.value = '';
+          }
+
+          overlay.classList.remove('hidden');
+          if (showInput) setTimeout(() => elInput.focus(), 40);
+
+          const finish = (val) => {
+            overlay.classList.add('hidden');
+            btnOk.onclick = null;
+            btnCan.onclick = null;
+            resolve(val);
+          };
+
+          btnCan.onclick = () => finish(null);
+          btnOk.onclick  = () => finish(showInput ? elInput.value : true);
+        });
+      };
+
+      // ── Sync Visuals & Persistence ───────────────────────────────────────
+      const updateSyncVisuals = () => {
+        const cloudBtn = document.getElementById('tdi-cloud-btn');
+        const dot      = document.getElementById('tdi-unsynced-dot');
+        const mobFab   = document.getElementById('tdi-mobile-fab');
+
+        if (cloudBtn) {
+          if (hasUnsynced) {
+            cloudBtn.classList.add('bg-amber-950', 'border-amber-500', 'text-amber-300');
+            cloudBtn.title = 'Unsynced changes — Click to Backup to Cloud';
+          } else {
+            cloudBtn.classList.remove('bg-amber-950', 'border-amber-500', 'text-amber-300');
+            cloudBtn.title = 'Cloud Backup Synced';
+          }
+        }
+        if (dot) dot.classList.toggle('hidden', !hasUnsynced);
+        if (mobFab) {
+          if (hasUnsynced) {
+            mobFab.classList.remove('from-sky-500', 'to-indigo-600', 'shadow-sky-500/40');
+            mobFab.classList.add('from-amber-600', 'to-orange-600', 'shadow-orange-500/40');
+          } else {
+            mobFab.classList.add('from-sky-500', 'to-indigo-600', 'shadow-sky-500/40');
+            mobFab.classList.remove('from-amber-600', 'to-orange-600', 'shadow-orange-500/40');
+          }
+        }
+      };
+
+      const setUnsyncedState = (dirty) => {
+        hasUnsynced = Boolean(dirty);
+        lsSet('tdi_unsynced', hasUnsynced);
+        updateSyncVisuals();
+      };
+
+      const saveTrades    = () => { lsSet('tdi_trades', trades); setUnsyncedState(true); };
+      const saveInterests = () => { lsSet('tdi_bond_interests', bondInterests); setUnsyncedState(true); };
+      const saveSymbols   = () => { lsSet('tdi_symbols', symbols); setUnsyncedState(true); };
+      const saveSegments  = () => { lsSet('tdi_segments', segments); setUnsyncedState(true); };
+      const saveBrokers   = () => { lsSet('tdi_brokers', brokers); setUnsyncedState(true); };
+      const savePrices    = () => lsSet('tdi_price_cache', priceCache);
+      const saveConfig    = () => lsSet('tdi_gist_config', gistConfig);
+      const saveYear      = () => lsSet('tdi_filter_year', filters.year);
+
+      // ── Bond Interest Integrity Guard ────────────────────────────────────
+      const isBondSegment = (seg) => String(seg || '').toLowerCase().includes('bond');
+
+      const hasMatchingBondTrade = (symbol, broker = '') => {
+        const symU = String(symbol || '').trim().toUpperCase();
+        const brk  = String(broker || '').trim();
+        if (!symU) return false;
+        return trades.some(t => {
+          if (!isBondSegment(t.segment)) return false;
+          if (String(t.symbol || '').trim().toUpperCase() !== symU) return false;
+          if (brk && String(t.broker || '').trim() !== brk) return false;
+          return true;
+        });
+      };
+
+      const pruneOrphanedBondInterests = (markDirty = false) => {
+        const before = bondInterests.length;
+        bondInterests = bondInterests.filter(item => {
+          const symU = String(item.symbol || '').trim().toUpperCase();
+          if (!symU) return false;
+          if (hasMatchingBondTrade(symU, item.broker || '')) return true;
+          if (!item.broker && hasMatchingBondTrade(symU, '')) return true;
+          return false;
+        });
+        if (bondInterests.length !== before) {
+          lsSet('tdi_bond_interests', bondInterests);
+          if (markDirty) setUnsyncedState(true);
+        }
+      };
+
+      pruneOrphanedBondInterests(false);
+
+      // ── Math & Formatting Helpers ────────────────────────────────────────
+      const roundQty = (n) => Math.round((Number(n) || 0) * 10000) / 10000;
+      const roundAmt = (n) => Math.round((Number(n) || 0) * 100) / 100;
+
+      const esc = (str) => String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+
+      const formatINR = (num) => {
+        const n = roundAmt(num);
+        return new Intl.NumberFormat('en-IN', {
+          style: 'currency',
+          currency: 'INR',
+          maximumFractionDigits: 2
+        }).format(n);
+      };
+
+      const normalizeSide = (s) => {
+        const v = String(s || 'BUY').toUpperCase();
+        if (v === 'LONG' || v === 'BUY' || v === 'B') return 'BUY';
+        if (v === 'SHORT' || v === 'SELL' || v === 'S') return 'SELL';
+        return 'BUY';
+      };
+
+      const sideBadge = (s) => normalizeSide(s) === 'BUY' ? 'B' : 'S';
+
+      const normalizeStyle = (t) => {
+        if (t.style) return String(t.style).toUpperCase();
+        return String(t.segment || '').toUpperCase() === 'INTRADAY' ? 'INTRADAY' : 'POSITIONAL';
+      };
+
+      const isOpen = (t) => t.exit == null || t.exit === '' || Number.isNaN(Number(t.exit));
+
+      const computeNet = (t) => {
+        if (isOpen(t)) return null;
+        const side  = normalizeSide(t.side);
+        const qty   = Number(t.qty) || 0;
+        const entry = Number(t.entry) || 0;
+        const exit  = Number(t.exit) || 0;
+        const fees  = Number(t.fees) || 0;
+        const gross = side === 'BUY' ? (exit - entry) * qty : (entry - exit) * qty;
+        return roundAmt(gross - fees);
+      };
+
+      const getCachedCmp = (symbol) => {
+        const entry = priceCache[String(symbol || '').trim().toUpperCase()];
+        return entry && Number.isFinite(Number(entry.price)) && Number(entry.price) > 0
+          ? Number(entry.price)
+          : null;
+      };
+
+      const sortLatestFirst = (list) => {
+        return list.slice().sort((a, b) => {
+          const dCmp = String(b.date || '').localeCompare(String(a.date || ''));
+          if (dCmp !== 0) return dCmp;
+          return (Number(b.id) || 0) - (Number(a.id) || 0);
+        });
+      };
+
+      const sortOldestFirst = (list) => {
+        return list.slice().sort((a, b) => {
+          const dCmp = String(a.date || '').localeCompare(String(b.date || ''));
+          if (dCmp !== 0) return dCmp;
+          return (Number(a.id) || 0) - (Number(b.id) || 0);
+        });
+      };
+
+      // ── Live / EOD Quote Fetchers (Yahoo Finance + CORS Fallback + AMFI MFAPI) ──
+      const fetchJson = async (url, timeoutMs = 10000) => {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+        try {
+          const res = await fetch(url, { signal: ctrl.signal });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return await res.json();
+        } finally {
+          clearTimeout(timer);
+        }
+      };
+
+      const fetchYahooPrice = async (symbol, customCode = '') => {
+        const clean = String(symbol || '').trim().toUpperCase();
+        if (!clean) return null;
+        let ticker = clean;
+        if (customCode && customCode.startsWith('.')) {
+          ticker = `${clean}${customCode.toUpperCase()}`;
+        } else if (!/\.(NS|BO)$/i.test(clean)) {
+          ticker = `${clean}.NS`;
+        }
+        const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=2d`;
+        const endpoints = [
+          yahooUrl,
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`,
+          `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`
+        ];
+
+        for (const ep of endpoints) {
+          try {
+            const json = await fetchJson(ep, 9000);
+            const meta = json?.chart?.result?.[0]?.meta;
+            const price = meta?.regularMarketPrice ?? meta?.previousClose;
+            if (typeof price === 'number' && price > 0) return roundAmt(price);
+          } catch (e) {}
+        }
+        return null;
+      };
+
+      const fetchMutualFundNav = async (symbol, customCode = '') => {
+        const clean = String(symbol || '').trim();
+        let code = String(customCode || '').trim();
+
+        if (!code && /^\d{5,7}$/.test(clean)) {
+          code = clean;
+        }
+        if (!code) {
+          const searchRes = await fetchJson(`https://api.mfapi.in/mf/search?q=${encodeURIComponent(clean)}`, 9000);
+          if (Array.isArray(searchRes) && searchRes.length > 0) {
+            const direct = searchRes.find(x => /direct/i.test(x.schemeName) && /growth/i.test(x.schemeName));
+            code = String((direct || searchRes[0]).schemeCode);
+          }
+        }
+        if (!code) return null;
+
+        const navRes = await fetchJson(`https://api.mfapi.in/mf/${encodeURIComponent(code)}/latest`, 9000);
+        const navVal = parseFloat(navRes?.data?.[0]?.nav);
+        return (!Number.isNaN(navVal) && navVal > 0) ? roundAmt(navVal) : null;
+      };
+
+      const refreshLivePrices = async () => {
+        if (isFetchingCmp) return;
+        const openHoldings = trades.filter(t => isOpen(t) && normalizeSide(t.side) === 'BUY');
+        if (!openHoldings.length) return setStatus('No open holdings');
+
+        const uniqueTargets = new Map();
+        openHoldings.forEach(t => {
+          const sym = String(t.symbol || '').trim().toUpperCase();
+          if (sym && !uniqueTargets.has(sym)) {
+            const dbEntry = symbols.find(s => s.symbol === sym);
+            uniqueTargets.set(sym, {
+              symbol: sym,
+              segment: t.segment || dbEntry?.segment || 'Stocks',
+              code: dbEntry?.code || ''
+            });
+          }
+        });
+
+        isFetchingCmp = true;
+        const icon = document.getElementById('tdi-refresh-icon');
+        if (icon) icon.classList.add('animate-spin-fast');
+        setStatus(`Fetching ${uniqueTargets.size} CMP...`);
+
+        let updated = 0;
+        const tasks = Array.from(uniqueTargets.values()).map(async (item) => {
+          const segLow = String(item.segment || '').toLowerCase();
+          if (segLow.includes('bond')) return;
+          try {
+            const price = segLow.includes('mutual')
+              ? await fetchMutualFundNav(item.symbol, item.code)
+              : await fetchYahooPrice(item.symbol, item.code);
+            if (price != null) {
+              priceCache[item.symbol] = {
+                price,
+                updatedAt: new Date().toISOString()
+              };
+              updated++;
+            }
+          } catch (e) {}
+        });
+
+        await Promise.allSettled(tasks);
+        savePrices();
+        isFetchingCmp = false;
+        if (icon) icon.classList.remove('animate-spin-fast');
+        renderAll();
+        setStatus(updated > 0 ? `Updated ${updated} CMP` : 'CMP unchanged');
+      };
+
+      // ── Toggle Collapsible Entry Box & Filter Bar ────────────────────────
+      const setEntryOpen = (open) => {
+        entryOpen = Boolean(open);
+        if (entryOpen && activeTab !== 'main') setTab('main');
+        const box = document.getElementById('tdi-form-box');
+        const btn = document.getElementById('tdi-entry-toggle');
+        box.classList.toggle('hidden', !entryOpen);
+        if (entryOpen) {
+          btn.classList.add('ring-2', 'ring-sky-300');
+          box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+          btn.classList.remove('ring-2', 'ring-sky-300');
+          hideSymDropdown();
+        }
+      };
+
+      const toggleFilters = () => {
+        filtersOpen = !filtersOpen;
+        const bar = document.getElementById('tdi-filterbar');
+        const btn = document.getElementById('tdi-filter-toggle');
+        bar.classList.toggle('hidden', !filtersOpen);
+        if (filtersOpen) {
+          btn.classList.add('bg-sky-950', 'border-sky-400', 'text-sky-300');
+        } else {
+          btn.classList.remove('bg-sky-950', 'border-sky-400', 'text-sky-300');
+        }
+      };
+
+      // ── Open Qty Reminder Pill ───────────────────────────────────────────
+      const updateOpenReminder = () => {
+        const pill = document.getElementById('tdi-open-reminder');
+        const txt  = document.getElementById('tdi-reminder-text');
+        const sym  = (document.getElementById('t-sym')?.value || '').trim().toUpperCase();
+        if (!pill || !txt) return;
+
+        if (!sym) {
+          pill.classList.add('hidden');
+          pill.classList.remove('flex');
+          return;
+        }
+
+        const openLots = trades.filter(t => isOpen(t) && normalizeSide(t.side) === 'BUY' && (t.symbol || '').toUpperCase() === sym);
+        if (!openLots.length) {
+          pill.classList.add('hidden');
+          pill.classList.remove('flex');
+          return;
+        }
+
+        const totalQty  = roundQty(openLots.reduce((acc, t) => acc + (Number(t.qty) || 0), 0));
+        const totalCost = roundAmt(openLots.reduce((acc, t) => acc + (Number(t.qty) || 0) * (Number(t.entry) || 0), 0));
+        const avgPrice  = totalQty > 0 ? roundAmt(totalCost / totalQty) : 0;
+        const brokerSet = [...new Set(openLots.map(t => t.broker).filter(Boolean))].join(', ');
+        const cmp       = getCachedCmp(sym);
+        const cmpStr    = cmp ? ` · CMP <b class="text-white">${formatINR(cmp)}</b>` : '';
+
+        txt.innerHTML = `Open <b>${esc(sym)}</b> (${esc(brokerSet)}): <b class="text-amber-300">${totalQty}</b> @ Avg <b class="text-sky-300">${formatINR(avgPrice)}</b>${cmpStr}`;
+        pill.classList.remove('hidden');
+        pill.classList.add('flex');
+
+        document.getElementById('tdi-reminder-sell').onclick = () => {
+          const first = openLots[0];
+          if (first && brokers.includes(first.broker)) document.getElementById('t-broker').value = first.broker;
+          if (first && segments.includes(first.segment)) document.getElementById('t-seg').value = first.segment;
+          document.getElementById('t-side').value = 'SELL';
+          document.getElementById('t-qty').value  = totalQty;
+          if (cmp) document.getElementById('t-entry').value = cmp;
+          updateFormMode();
+          document.getElementById('t-entry').focus();
+        };
+      };
+
+      // ── Dynamic Form Mode ────────────────────────────────────────────────
+      const updateFormMode = () => {
+        const seg  = (document.getElementById('t-seg')?.value || '').toLowerCase();
+        const side = normalizeSide(document.getElementById('t-side')?.value || 'BUY');
+
+        const lblQty   = document.getElementById('lbl-qty');
+        const inpQty   = document.getElementById('t-qty');
+        const lblEntry = document.getElementById('lbl-entry');
+        const inpEntry = document.getElementById('t-entry');
+        const wrapExit = document.getElementById('wrap-exit');
+        const lblExit  = document.getElementById('lbl-exit');
+        const wrapInt  = document.getElementById('wrap-interest');
+        const wrapNote = document.getElementById('wrap-notes');
+        const intBtn   = document.getElementById('tdi-open-int-btn');
+
+        const isMF   = seg.includes('mutual');
+        const isBond = seg.includes('bond');
+
+        if (isMF) {
+          lblQty.textContent   = 'Quantity';
+          inpQty.placeholder   = 'Units';
+          lblEntry.textContent = side === 'SELL' ? 'Sell NAV ₹' : 'NAV ₹';
+          inpEntry.placeholder = 'NAV ₹';
+          lblExit.textContent  = 'Exit NAV ₹';
+        } else if (isBond) {
+          lblQty.textContent   = 'Qty';
+          inpQty.placeholder   = 'Units';
+          lblEntry.textContent = side === 'SELL' ? 'Sell ₹' : 'Price ₹';
+          inpEntry.placeholder = 'Price ₹';
+          lblExit.textContent  = 'Exit ₹';
+        } else {
+          lblQty.textContent   = 'Qty';
+          inpQty.placeholder   = 'Qty';
+          lblEntry.textContent = side === 'SELL' ? 'Sell ₹' : 'Buy ₹';
+          inpEntry.placeholder = 'Price ₹';
+          lblExit.textContent  = 'Exit ₹';
+        }
+
+        if (side === 'SELL' && editingId == null) {
+          wrapExit.classList.add('hidden');
+          wrapExit.classList.remove('flex');
+          document.getElementById('t-exit').value = '';
+        } else {
+          wrapExit.classList.remove('hidden');
+          wrapExit.classList.add('flex');
+        }
+
+        if (isBond) {
+          wrapInt.classList.remove('hidden');
+          wrapInt.classList.add('flex');
+          intBtn.classList.remove('hidden');
+        } else {
+          wrapInt.classList.add('hidden');
+          wrapInt.classList.remove('flex');
+          intBtn.classList.add('hidden');
+        }
+
+        const visibleExtraCols = (!wrapInt.classList.contains('hidden') ? 1 : 0) + (!wrapExit.classList.contains('hidden') ? 1 : 0);
+        wrapNote.classList.remove('md:col-span-2', 'md:col-span-3');
+        if (visibleExtraCols === 0) wrapNote.classList.add('md:col-span-3');
+        else if (visibleExtraCols === 1) wrapNote.classList.add('md:col-span-2');
+      };
+
+      // ── Bond Interest Helpers ────────────────────────────────────────────
+      const openBondInterestBox = (symbol = '', broker = '') => {
+        setEntryOpen(true);
+        const sym = (symbol || document.getElementById('t-sym').value || '').trim().toUpperCase();
+        const brk = broker || document.getElementById('t-broker').value || '';
+        interestModalTarget = { symbol: sym, broker: brk };
+        document.getElementById('int-box-title').textContent = sym ? `${sym} Date` : 'Date';
+        document.getElementById('int-date').valueAsDate = new Date();
+        document.getElementById('int-amount').value = '';
+        const box = document.getElementById('tdi-interest-box');
+        box.classList.remove('hidden');
+        box.classList.add('flex');
+        document.getElementById('int-amount').focus();
+      };
+
+      const getBondInterestsFor = (symbol, broker = '') => {
+        const symU = (symbol || '').trim().toUpperCase();
+        const brk  = String(broker || '').trim();
+        if (!hasMatchingBondTrade(symU, brk)) return [];
+        return sortLatestFirst(bondInterests).filter(item => {
+          if (String(item.symbol || '').trim().toUpperCase() !== symU) return false;
+          if (brk && item.broker && String(item.broker).trim() !== brk) return false;
+          return true;
+        });
+      };
+
+      // ── Delete Trade & Clean Associated Bond Interest ────────────────────
+      const deleteTradeById = (id) => {
+        const target = trades.find(x => String(x.id) === String(id));
+        if (!target) return;
+
+        trades = trades.filter(x => String(x.id) !== String(id));
+
+        if (isBondSegment(target.segment)) {
+          const symU = String(target.symbol || '').trim().toUpperCase();
+          const brk  = String(target.broker || '').trim();
+          if (!hasMatchingBondTrade(symU, brk)) {
+            bondInterests = bondInterests.filter(bi => {
+              const biSym = String(bi.symbol || '').trim().toUpperCase();
+              const biBrk = String(bi.broker || '').trim();
+              if (biSym !== symU) return true;
+              if (brk && biBrk && biBrk !== brk) return true;
+              return false;
+            });
+          }
+          pruneOrphanedBondInterests(false);
+          lsSet('tdi_bond_interests', bondInterests);
+        }
+
+        saveTrades();
+        renderAll();
+        setStatus('Deleted');
+      };
+
+      // ── Navigation & Status ──────────────────────────────────────────────
+      const setTab = (tab) => {
+        activeTab = tab;
+        hideSymDropdown();
+
+        document.querySelectorAll('.tdi-tab-desktop').forEach(b => {
+          const isAct = b.dataset.tab === tab;
+          b.className = isAct
+            ? 'tdi-tab-desktop px-3.5 py-1.5 rounded-lg text-xs font-bold transition bg-gradient-to-r from-sky-600 to-indigo-600 text-white shadow'
+            : 'tdi-tab-desktop px-3.5 py-1.5 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200';
+        });
+
+        document.querySelectorAll('.tdi-tab-mobile').forEach(b => {
+          const isAct = b.dataset.tab === tab;
+          b.className = isAct
+            ? 'tdi-tab-mobile flex flex-col items-center gap-0.5 py-1.5 px-4 text-sky-400 font-bold text-[11px]'
+            : 'tdi-tab-mobile flex flex-col items-center gap-0.5 py-1.5 px-4 text-slate-400 font-semibold text-[11px]';
+        });
+
+        const setBtn = document.getElementById('tdi-settings-btn');
+        if (setBtn) {
+          if (tab === 'settings') setBtn.classList.add('bg-sky-950', 'border-sky-400', 'text-sky-300');
+          else setBtn.classList.remove('bg-sky-950', 'border-sky-400', 'text-sky-300');
+        }
+
+        document.querySelectorAll('.tdi-view').forEach(v => {
+          v.classList.toggle('hidden', v.id !== `view-${tab}`);
+        });
+
+        // Hide shared filterbar on settings view
+        const filterBar = document.getElementById('tdi-filterbar');
+        if (tab === 'settings') {
+          filterBar.classList.add('hidden');
+          document.getElementById('gh-token').value   = gistConfig.token || '';
+          document.getElementById('gh-gist-id').value = gistConfig.gistId || '';
+          const lbl = document.getElementById('tdi-last-sync-lbl');
+          if (lbl) lbl.textContent = lastSyncedAt ? `Last synced: ${new Date(lastSyncedAt).toLocaleString()}` : '';
+          renderSettingsLists();
+        } else {
+          filterBar.classList.toggle('hidden', !filtersOpen);
+          renderAll();
+        }
+      };
+
+      const setStatus = (msg, isErr = false) => {
+        const el = document.getElementById('tdi-status');
+        if (!el) return;
+        el.textContent = msg;
+        el.className = isErr
+          ? 'text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-rose-950 border border-rose-700 text-[#fb7185] truncate max-w-[130px] sm:max-w-[220px]'
+          : 'text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-[#38bdf8] truncate max-w-[130px] sm:max-w-[220px]';
+      };
+
+      // ── Sync Dropdown Options ────────────────────────────────────────────
+      const refreshAllSelects = () => {
+        const monthOpts = `<option value="all">All Months</option>` +
+          MONTHS.map(([val, lbl]) => `<option value="${val}">${lbl}</option>`).join('');
+        const fMonth = document.getElementById('f-month');
+        if (fMonth) { fMonth.innerHTML = monthOpts; fMonth.value = filters.month; }
+
+        const segOptsAll  = `<option value="all">All Categories</option>` + segments.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
+        const segOptsForm = segments.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
+
+        const fSeg = document.getElementById('f-seg');
+        if (fSeg) { fSeg.innerHTML = segOptsAll; fSeg.value = filters.seg; }
+
+        ['t-seg', 'sym-new-seg'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+            const prev = el.value;
+            el.innerHTML = segOptsForm;
+            if (segments.includes(prev)) el.value = prev;
+          }
+        });
+
+        const brkOptsAll  = `<option value="all">All Brokers</option>` + brokers.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join('');
+        const brkOptsForm = brokers.length
+          ? brokers.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join('')
+          : `<option value="Default">Default</option>`;
+
+        const fBrk = document.getElementById('f-broker');
+        if (fBrk) { fBrk.innerHTML = brkOptsAll; fBrk.value = filters.broker; }
+
+        const tBrk = document.getElementById('t-broker');
+        if (tBrk) {
+          const prev = tBrk.value;
+          tBrk.innerHTML = brkOptsForm;
+          if (brokers.includes(prev)) tBrk.value = prev;
+        }
+      };
+
+      const syncFilterInputs = () => {
+        const years = [...new Set([
+          ...trades.map(t => t.date?.slice(0, 4)),
+          ...bondInterests.map(i => i.date?.slice(0, 4))
+        ].filter(Boolean))].sort().reverse();
+
+        const yearHtml = '<option value="all">All Years</option>' + years.map(y => `<option value="${esc(y)}">${esc(y)}</option>`).join('');
+        const fYear = document.getElementById('f-year');
+        if (fYear) {
+          fYear.innerHTML = yearHtml;
+          fYear.value = years.includes(filters.year) ? filters.year : 'all';
+          filters.year = fYear.value;
+        }
+
+        const pairs = [
+          ['f-month', filters.month],
+          ['f-seg', filters.seg],
+          ['f-broker', filters.broker],
+          ['f-side', filters.side],
+          ['f-style', filters.style],
+          ['f-outcome', filters.outcome],
+          ['f-status', filters.status],
+          ['f-query', filters.query]
+        ];
+        pairs.forEach(([id, val]) => {
+          const el = document.getElementById(id);
+          if (el && el.value !== val) el.value = val;
+        });
+
+        // Show status dropdown specifically on Trades tab
+        const fStatus = document.getElementById('f-status');
+        if (fStatus) {
+          fStatus.classList.toggle('hidden', activeTab !== 'trades');
+        }
+      };
+
+      // ── Filtering Engine ─────────────────────────────────────────────────
+      const getFilteredTrades = (ignoreStatus = false) => {
+        const q = filters.query.trim().toUpperCase();
+        return sortLatestFirst(trades).filter(t => {
+          if (filters.year !== 'all' && !(t.date && t.date.startsWith(filters.year))) return false;
+          if (filters.month !== 'all' && !(t.date && t.date.slice(5, 7) === filters.month)) return false;
+          if (filters.seg !== 'all' && t.segment !== filters.seg) return false;
+          if (filters.broker !== 'all' && (t.broker || '') !== filters.broker) return false;
+          if (filters.side !== 'all' && normalizeSide(t.side) !== filters.side) return false;
+          if (filters.style !== 'all' && normalizeStyle(t) !== filters.style) return false;
+
+          if (filters.outcome !== 'all') {
+            if (isOpen(t)) return false;
+            const net = computeNet(t);
+            if (filters.outcome === 'win' && !(net > 0)) return false;
+            if (filters.outcome === 'loss' && !(net < 0)) return false;
+          }
+
+          if (!ignoreStatus) {
+            if (filters.status === 'open' && !isOpen(t)) return false;
+            if (filters.status === 'closed' && isOpen(t)) return false;
+          }
+          if (q) {
+            const hay = `${t.symbol || ''} ${t.notes || ''} ${t.segment || ''} ${t.broker || ''}`.toUpperCase();
+            if (!hay.includes(q)) return false;
+          }
+          return true;
+        });
+      };
+
+      const getFilteredBondInterestTotal = (respectTradesStatus = false) => {
+        if (filters.outcome === 'loss') return 0;
+        if (filters.side === 'SELL') return 0;
+        if (filters.style === 'INTRADAY') return 0;
+        if (respectTradesStatus && filters.status === 'closed') return 0;
+
+        const q = filters.query.trim().toUpperCase();
+        return roundAmt(bondInterests.reduce((sum, item) => {
+          const symU = String(item.symbol || '').trim().toUpperCase();
+          const brk  = String(item.broker || '').trim();
+          if (!hasMatchingBondTrade(symU, brk) && !(brk === '' && hasMatchingBondTrade(symU, ''))) return sum;
+
+          if (filters.year !== 'all' && !(item.date && item.date.startsWith(filters.year))) return sum;
+          if (filters.month !== 'all' && !(item.date && item.date.slice(5, 7) === filters.month)) return sum;
+          if (filters.seg !== 'all' && !isBondSegment(filters.seg)) return sum;
+          if (filters.broker !== 'all' && brk && brk !== filters.broker) return sum;
+          if (q && !symU.includes(q)) return sum;
+          return sum + (Number(item.amount) || 0);
+        }, 0));
+      };
+
+      // ── Consolidate Open Positions & Unrealized Live P&L ─────────────────
+      const getConsolidatedOpenPositions = (list) => {
+        const groups = new Map();
+        list.filter(t => isOpen(t) && normalizeSide(t.side) === 'BUY').forEach(t => {
+          const key = `${(t.symbol || '').toUpperCase()}__${t.broker || ''}__${t.segment || ''}`;
+          const qty   = Number(t.qty) || 0;
+          const entry = Number(t.entry) || 0;
+          const fees  = Number(t.fees) || 0;
+
+          if (!groups.has(key)) {
+            groups.set(key, {
+              key,
+              symbol: (t.symbol || '').toUpperCase(),
+              broker: t.broker || '—',
+              segment: t.segment || 'Stocks',
+              totalQty: 0,
+              totalCost: 0,
+              totalFees: 0,
+              latestDate: t.date || '',
+              interest: t.interest || '',
+              lots: []
+            });
+          }
+          const g = groups.get(key);
+          g.totalQty  = roundQty(g.totalQty + qty);
+          g.totalCost = roundAmt(g.totalCost + qty * entry);
+          g.totalFees = roundAmt(g.totalFees + fees);
+          if ((t.date || '') > g.latestDate) g.latestDate = t.date;
+          if (t.interest) g.interest = t.interest;
+          g.lots.push(t);
+        });
+
+        return Array.from(groups.values()).map(g => {
+          const avgPrice = g.totalQty > 0 ? roundAmt(g.totalCost / g.totalQty) : 0;
+          const cmp      = getCachedCmp(g.symbol);
+          const curVal   = cmp != null ? roundAmt(cmp * g.totalQty) : null;
+          const livePnl  = curVal != null ? roundAmt(curVal - g.totalCost) : null;
+          const livePct  = (livePnl != null && g.totalCost > 0) ? roundAmt((livePnl / g.totalCost) * 100) : null;
+          return { ...g, avgPrice, cmp, curVal, livePnl, livePct };
+        });
+      };
+
+      // ── Auto-Match SELL Against Open BUYs (FIFO) ─────────────────────────
+      const processAutoSellMatch = (sellData) => {
+        const sellQtyTotal  = roundQty(sellData.qty);
+        const sellPrice     = Number(sellData.entry) || Number(sellData.exit) || 0;
+        const totalSellFees = Number(sellData.fees) || 0;
+        const targetSym     = (sellData.symbol || '').trim().toUpperCase();
+        const targetBrk     = (sellData.broker || '').trim();
+
+        if (sellQtyTotal <= 0 || sellPrice <= 0) return false;
+
+        let matchingOpens = sortOldestFirst(trades).filter(t =>
+          isOpen(t) &&
+          normalizeSide(t.side) === 'BUY' &&
+          (t.symbol || '').trim().toUpperCase() === targetSym &&
+          (t.broker || '').trim() === targetBrk
+        );
+
+        if (!matchingOpens.length) {
+          const anyBrokerOpens = sortOldestFirst(trades).filter(t =>
+            isOpen(t) &&
+            normalizeSide(t.side) === 'BUY' &&
+            (t.symbol || '').trim().toUpperCase() === targetSym
+          );
+          if (!anyBrokerOpens.length) return false;
+          matchingOpens = anyBrokerOpens;
+        }
+
+        let remainingToSell = sellQtyTotal;
+
+        for (const openT of matchingOpens) {
+          if (remainingToSell <= 1e-9) break;
+          const openQty = roundQty(openT.qty);
+          if (openQty <= 0) continue;
+
+          const matchedQty = Math.min(openQty, remainingToSell);
+          const allocSellFees = roundAmt((matchedQty / sellQtyTotal) * totalSellFees);
+
+          if (openQty <= remainingToSell + 1e-7) {
+            openT.exit     = sellPrice;
+            openT.exitDate = sellData.date;
+            openT.fees     = roundAmt((Number(openT.fees) || 0) + allocSellFees);
+            if (sellData.notes) {
+              openT.notes = openT.notes ? `${openT.notes} | ${sellData.notes}` : sellData.notes;
+            }
+            remainingToSell = roundQty(remainingToSell - openQty);
+          } else {
+            const leftPart    = roundQty(openQty - matchedQty);
+            const origFees    = Number(openT.fees) || 0;
+            const buyFeeShare = roundAmt((matchedQty / openQty) * origFees);
+
+            openT.qty  = leftPart;
+            openT.fees = roundAmt(origFees - buyFeeShare);
+
+            trades.push({
+              ...openT,
+              id: Date.now() + Math.floor(Math.random() * 10000),
+              qty: matchedQty,
+              exit: sellPrice,
+              exitDate: sellData.date,
+              fees: roundAmt(buyFeeShare + allocSellFees),
+              notes: sellData.notes || openT.notes
+            });
+
+            remainingToSell = 0;
+          }
+        }
+
+        if (remainingToSell > 1e-7) {
+          const excessFees = roundAmt((remainingToSell / sellQtyTotal) * totalSellFees);
+          trades.push({
+            id: Date.now() + 9999,
+            ...sellData,
+            qty: remainingToSell,
+            entry: sellPrice,
+            exit: null,
+            fees: excessFees
+          });
+        }
+
+        setStatus(`Sold ${sellQtyTotal} ${targetSym}`);
+        return true;
+      };
+
+      // ── Render Main KPIs, Open Positions & Trades Tab ────────────────────
+      const renderAll = () => {
+        pruneOrphanedBondInterests(false);
+        syncFilterInputs();
+
+        const filteredAllStatus = getFilteredTrades(true);
+        const filteredTradesTab = getFilteredTrades(false);
+        const mainInterest      = getFilteredBondInterestTotal(false);
+        const tradesInterest    = getFilteredBondInterestTotal(true);
+
+        document.querySelectorAll('.tdi-tab-count').forEach(el => {
+          el.textContent = filteredTradesTab.length;
+        });
+
+        let tradeNet = 0, totalCharges = 0, wins = 0, losses = 0, closedCount = 0, openInvested = 0, totalLivePnl = 0;
+        let capStocks = 0, capMF = 0, capETF = 0, capBonds = 0;
+
+        filteredAllStatus.forEach(t => {
+          const net   = computeNet(t);
+          const qty   = Number(t.qty) || 0;
+          const entry = Number(t.entry) || 0;
+          totalCharges = roundAmt(totalCharges + (Number(t.fees) || 0));
+
+          if (isOpen(t)) {
+            const inv = roundAmt(qty * entry);
+            openInvested = roundAmt(openInvested + inv);
+            const cmp = getCachedCmp(t.symbol);
+            if (cmp != null && normalizeSide(t.side) === 'BUY') {
+              totalLivePnl = roundAmt(totalLivePnl + (cmp - entry) * qty);
+            }
+            const segLow = String(t.segment || '').toLowerCase();
+            if (segLow.includes('mutual')) capMF = roundAmt(capMF + inv);
+            else if (segLow.includes('etf')) capETF = roundAmt(capETF + inv);
+            else if (segLow.includes('bond')) capBonds = roundAmt(capBonds + inv);
+            else capStocks = roundAmt(capStocks + inv);
+          } else {
+            closedCount++;
+            tradeNet = roundAmt(tradeNet + net);
+            if (net > 0) wins++;
+            else if (net < 0) losses++;
+          }
+        });
+
+        const combinedProfit = roundAmt(tradeNet + mainInterest);
+        const wr = closedCount ? Math.round((wins / closedCount) * 100) : 0;
+
+        const pbMainProfit = document.getElementById('pb-main-profit');
+        pbMainProfit.textContent = `${combinedProfit >= 0 ? '+' : ''}${formatINR(combinedProfit)}`;
+        pbMainProfit.className = `text-sm sm:text-base font-extrabold mt-0.5 ${combinedProfit >= 0 ? 'text-[#34d399]' : 'text-[#fb7185]'}`;
+
+        const pbMainLive = document.getElementById('pb-main-live');
+        pbMainLive.textContent = `${totalLivePnl >= 0 ? '+' : ''}${formatINR(totalLivePnl)}`;
+        pbMainLive.className = `text-sm sm:text-base font-extrabold mt-0.5 ${totalLivePnl >= 0 ? 'text-[#34d399]' : 'text-[#fb7185]'}`;
+
+        document.getElementById('pb-main-cap').textContent  = formatINR(openInvested);
+        document.getElementById('pb-main-win').textContent  = `${wr}% (${wins}W/${losses}L)`;
+        document.getElementById('pb-main-fees').textContent = formatINR(totalCharges);
+
+        document.getElementById('cap-stocks').textContent   = formatINR(capStocks);
+        document.getElementById('cap-mf').textContent       = formatINR(capMF);
+        document.getElementById('cap-etf').textContent      = formatINR(capETF);
+        document.getElementById('cap-bonds').textContent    = formatINR(capBonds);
+        document.getElementById('cap-interest').textContent = formatINR(mainInterest);
+
+        // Trades Tab Summary
+        let trdNet = 0, trdOpenCap = 0, trdWins = 0, trdLosses = 0, trdClosed = 0;
+        filteredTradesTab.forEach(t => {
+          const net = computeNet(t);
+          if (isOpen(t)) trdOpenCap = roundAmt(trdOpenCap + (Number(t.qty) || 0) * (Number(t.entry) || 0));
+          else {
+            trdClosed++;
+            trdNet = roundAmt(trdNet + net);
+            if (net > 0) trdWins++;
+            else if (net < 0) trdLosses++;
+          }
+        });
+        const trdCombined = roundAmt(trdNet + tradesInterest);
+        const trdWr = trdClosed ? Math.round((trdWins / trdClosed) * 100) : 0;
+        const pbTrdProfit = document.getElementById('pb-trd-profit');
+        pbTrdProfit.textContent = `${trdCombined >= 0 ? '+' : ''}${formatINR(trdCombined)}`;
+        pbTrdProfit.className = `text-sm sm:text-base font-extrabold mt-0.5 ${trdCombined >= 0 ? 'text-[#34d399]' : 'text-[#fb7185]'}`;
+        document.getElementById('pb-trd-cap').textContent   = formatINR(trdOpenCap);
+        document.getElementById('pb-trd-win').textContent   = `${trdWr}% (${trdWins}W/${trdLosses}L)`;
+        document.getElementById('pb-trd-count').textContent = `${filteredTradesTab.length}`;
+
+        renderMainPositionsOrHistory(filteredAllStatus);
+        renderTradesViews(filteredTradesTab);
+        updateOpenReminder();
+      };
+
+      const prefillFormFromPosition = (sym, seg, brk, side, qty = '') => {
+        setEntryOpen(true);
+        document.getElementById('t-sym').value = sym;
+        if (segments.includes(seg)) document.getElementById('t-seg').value = seg;
+        if (brokers.includes(brk)) document.getElementById('t-broker').value = brk;
+        document.getElementById('t-side').value = side;
+        document.getElementById('t-qty').value  = qty;
+        const cmp = getCachedCmp(sym);
+        if (side === 'SELL' && cmp) document.getElementById('t-entry').value = cmp;
+        updateFormMode();
+        updateOpenReminder();
+        if (qty === '') document.getElementById('t-qty').focus();
+        else document.getElementById('t-entry').focus();
+      };
+
+      const renderMainPositionsOrHistory = (filteredList) => {
+        const listEl  = document.getElementById('tdi-main-pos-list');
+        const titleEl = document.getElementById('tdi-main-list-title');
+        const subEl   = document.getElementById('tdi-main-list-sub');
+        if (!listEl) return;
+
+        const isSearchingSymbol = filters.query.trim().length > 0;
+
+        if (isSearchingSymbol) {
+          titleEl.textContent = `📜 ${filters.query.trim().toUpperCase()}`;
+          subEl.textContent   = `${filteredList.length}`;
+
+          if (!filteredList.length) {
+            listEl.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs">No trades found.</div>`;
+            return;
+          }
+
+          listEl.innerHTML = filteredList.map(t => {
+            const open = isOpen(t);
+            const net  = computeNet(t);
+            const side = normalizeSide(t.side);
+            const cls  = open ? 'border-l-amber-500' : (net >= 0 ? 'border-l-emerald-500' : 'border-l-red-500');
+            const rightHtml = open
+              ? `<span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-amber-500/15 text-amber-300 border border-amber-500/40">OPEN</span><div class="text-[11px] text-amber-400 mt-0.5">${formatINR(Number(t.qty) * Number(t.entry))}</div>`
+              : `<div class="${net >= 0 ? 'text-[#34d399]' : 'text-[#fb7185]'} font-extrabold text-xs sm:text-sm">${net >= 0 ? '+' : ''}${formatINR(net)}</div><div class="text-[10px] text-slate-400">Exit ₹${esc(t.exit)}</div>`;
+
+            return `
+              <div class="scroll-friendly bg-[#161f33] border border-slate-800 border-l-4 ${cls} rounded-xl p-3 flex items-center justify-between flex-wrap gap-2">
+                <div>
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <b class="text-xs sm:text-sm text-slate-50">${esc(t.symbol)}</b>
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase bg-blue-500/15 text-blue-400 border border-blue-500/30">${esc(t.segment)}</span>
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase bg-purple-500/15 text-purple-300 border border-purple-500/30">${esc(t.broker || '—')}</span>
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase ${side === 'BUY' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'}">${sideBadge(side)}</span>
+                    ${t.interest ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-yellow-500/15 text-yellow-300 border border-yellow-500/30">${esc(t.interest)}%</span>` : ''}
+                  </div>
+                  <div class="text-[11px] text-slate-400 mt-1">
+                    ${esc(t.date)} · Qty <b>${esc(t.qty)}</b> @ <b>₹${esc(t.entry)}</b> ${t.notes ? `· ${esc(t.notes)}` : ''}
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 ml-auto">
+                  <div class="text-right">${rightHtml}</div>
+                  <button type="button" data-edit="${esc(t.id)}" class="px-2.5 py-1.5 rounded-lg bg-violet-900 hover:bg-violet-800 border border-violet-600 text-white text-xs font-bold">✎</button>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          listEl.querySelectorAll('[data-edit]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const t = trades.find(x => String(x.id) === String(btn.dataset.edit));
+              if (t) startEdit(t);
+            });
+          });
+          return;
+        }
+
+        const consolidated = getConsolidatedOpenPositions(filteredList);
+        titleEl.textContent = `📌 Open Positions`;
+        subEl.textContent   = `${consolidated.length}`;
+
+        if (!consolidated.length) {
+          listEl.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs">No open positions.</div>`;
+          return;
+        }
+
+        listEl.innerHTML = consolidated.map(p => {
+          const isExp       = expandedKeys.has(p.key);
+          const hasMultiple = p.lots.length > 1;
+          const isBond      = isBondSegment(p.segment);
+          const bondInts    = isBond ? getBondInterestsFor(p.symbol, p.broker) : [];
+          const bondIntSum  = roundAmt(bondInts.reduce((s, i) => s + (Number(i.amount) || 0), 0));
+          const canExpand   = hasMultiple || bondInts.length > 0;
+
+          const countBadge  = canExpand ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-amber-500/15 text-amber-300 border border-amber-500/40">${hasMultiple ? p.lots.length + ' ' : ''}${isExp ? '▲' : '▼'}</span>` : '';
+          const rateBadge   = p.interest ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-yellow-500/15 text-yellow-300 border border-yellow-500/30">${esc(p.interest)}%</span>` : '';
+          const intAmtBadge = bondIntSum > 0 ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-yellow-500/15 text-yellow-300 border border-yellow-500/30">+${formatINR(bondIntSum)} int</span>` : '';
+
+          const cmpLine = p.cmp != null
+            ? ` · CMP <b class="text-slate-100">₹${p.cmp}</b> (<span class="font-extrabold ${p.livePnl >= 0 ? 'text-[#34d399]' : 'text-[#fb7185]'}">${p.livePnl >= 0 ? '+' : ''}${formatINR(p.livePnl)} / ${p.livePct >= 0 ? '+' : ''}${p.livePct}%</span>)`
+            : '';
+
+          let expandedHtml = '';
+          if (isExp && canExpand) {
+            const lotsRows = hasMultiple
+              ? sortLatestFirst(p.lots).map(lot => `
+                <div class="flex items-center justify-between text-[11px] text-slate-300 px-2 py-1.5 rounded-lg bg-[#111827]">
+                  <span>${esc(lot.date)} · Qty <b>${esc(lot.qty)}</b> @ <b>₹${esc(lot.entry)}</b></span>
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-amber-400 font-bold">${formatINR(Number(lot.qty) * Number(lot.entry))}</span>
+                    <button type="button" data-edit="${esc(lot.id)}" class="px-2 py-0.5 rounded bg-violet-900 text-white text-[10px] font-bold">✎</button>
+                  </div>
+                </div>
+              `).join('')
+              : '';
+
+            const intRows = bondInts.map(bi => `
+              <div class="flex items-center justify-between text-[11px] text-slate-300 px-2 py-1.5 rounded-lg bg-[#111827] border-l-2 border-l-yellow-500">
+                <span>💰 Interest · ${esc(bi.date)}</span>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-yellow-300 font-extrabold">+${formatINR(bi.amount)}</span>
+                  <button type="button" data-delint="${esc(bi.id)}" class="px-2 py-0.5 rounded bg-red-900 text-white text-[10px] font-bold">✕</button>
+                </div>
+              </div>
+            `).join('');
+
+            expandedHtml = `<div class="flex flex-col gap-1.5 bg-[#0b1120] p-2.5 border-t border-dashed border-slate-700 rounded-b-xl">${lotsRows}${intRows}</div>`;
+          }
+
+          return `
+            <div class="scroll-friendly bg-[#161f33] border border-slate-800 border-l-4 border-l-amber-500 rounded-xl">
+              <div class="p-3 flex items-center justify-between flex-wrap gap-2 ${canExpand ? 'cursor-pointer hover:bg-slate-800/40' : ''}" data-toggle-key="${esc(p.key)}" data-expandable="${canExpand ? '1' : '0'}">
+                <div>
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <b class="text-xs sm:text-sm text-slate-50">${esc(p.symbol)}</b>
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase bg-blue-500/15 text-blue-400 border border-blue-500/30">${esc(p.segment)}</span>
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase bg-purple-500/15 text-purple-300 border border-purple-500/30">${esc(p.broker)}</span>
+                    ${countBadge}
+                    ${rateBadge}
+                    ${intAmtBadge}
+                  </div>
+                  <div class="text-[11px] text-slate-400 mt-1">
+                    Qty <b class="text-slate-100">${p.totalQty}</b> · Avg <b class="text-[#38bdf8]">${formatINR(p.avgPrice)}</b> · Inv <b class="text-amber-400">${formatINR(p.totalCost)}</b>${cmpLine}
+                  </div>
+                </div>
+                <div class="flex items-center gap-1.5 ml-auto">
+                  ${isBond ? `<button type="button" data-addint="${esc(p.symbol)}" data-ibrk="${esc(p.broker)}" class="px-2.5 py-1.5 rounded-lg bg-amber-900 hover:bg-amber-800 border border-amber-500 text-amber-100 font-bold text-[11px]">+ Int</button>` : ''}
+                  <button type="button" data-qbuy="${esc(p.symbol)}" data-qbrk="${esc(p.broker)}" data-qseg="${esc(p.segment)}" class="px-2.5 py-1.5 rounded-lg bg-emerald-900 hover:bg-emerald-800 border border-emerald-500 text-emerald-50 font-extrabold text-[11px]">B</button>
+                  <button type="button" data-qsell="${esc(p.symbol)}" data-qbrk="${esc(p.broker)}" data-qseg="${esc(p.segment)}" data-qqty="${p.totalQty}" class="px-2.5 py-1.5 rounded-lg bg-rose-900 hover:bg-rose-800 border border-rose-500 text-rose-50 font-extrabold text-[11px]">S</button>
+                </div>
+              </div>
+              ${expandedHtml}
+            </div>
+          `;
+        }).join('');
+
+        listEl.querySelectorAll('[data-toggle-key]').forEach(card => {
+          card.addEventListener('click', (e) => {
+            if (e.target.closest('button')) return;
+            if (card.dataset.expandable !== '1') return;
+            const k = card.dataset.toggleKey;
+            if (expandedKeys.has(k)) expandedKeys.delete(k);
+            else expandedKeys.add(k);
+            renderAll();
+          });
+        });
+
+        listEl.querySelectorAll('[data-qbuy]').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            prefillFormFromPosition(btn.dataset.qbuy, btn.dataset.qseg, btn.dataset.qbrk, 'BUY', '');
+          });
+        });
+
+        listEl.querySelectorAll('[data-qsell]').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            prefillFormFromPosition(btn.dataset.qsell, btn.dataset.qseg, btn.dataset.qbrk, 'SELL', btn.dataset.qqty);
+          });
+        });
+
+        listEl.querySelectorAll('[data-addint]').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openBondInterestBox(btn.dataset.addint, btn.dataset.ibrk);
+          });
+        });
+
+        listEl.querySelectorAll('[data-edit]').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const t = trades.find(x => String(x.id) === String(btn.dataset.edit));
+            if (t) startEdit(t);
+          });
+        });
+
+        listEl.querySelectorAll('[data-delint]').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            bondInterests = bondInterests.filter(x => String(x.id) !== String(btn.dataset.delint));
+            saveInterests();
+            renderAll();
+          });
+        });
+      };
+
+      // ── Render Trades Tab ────────────────────────────────────────────────
+      const renderTradesViews = (filtered) => {
+        const tbody  = document.getElementById('tdi-desktop-tbody');
+        const mCards = document.getElementById('tdi-mobile-cards');
+        if (!tbody || !mCards) return;
+
+        if (!filtered.length) {
+          tbody.innerHTML  = `<tr><td colspan="13" class="text-center py-6 text-slate-500">No trades found.</td></tr>`;
+          mCards.innerHTML = `<div class="text-center py-6 text-slate-500 bg-[#111827] rounded-2xl text-xs">No trades found.</div>`;
+          return;
+        }
+
+        tbody.innerHTML = filtered.map(t => {
+          const open    = isOpen(t);
+          const net     = computeNet(t);
+          const side    = normalizeSide(t.side);
+          const style   = normalizeStyle(t);
+          const sideCls = side === 'BUY' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-rose-500/20 text-rose-300 border border-rose-500/40';
+          const isBond  = isBondSegment(t.segment);
+          const bInts   = isBond ? getBondInterestsFor(t.symbol, t.broker) : [];
+          const bIntSum = roundAmt(bInts.reduce((s, i) => s + (Number(i.amount) || 0), 0));
+
+          const netHtml = open
+            ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-amber-500/15 text-amber-300 border border-amber-500/40">OPEN</span>${bIntSum > 0 ? ` <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-yellow-500/15 text-yellow-300 border border-yellow-500/30">+${formatINR(bIntSum)}</span>` : ''}`
+            : `<span class="font-extrabold ${net >= 0 ? 'text-[#34d399]' : 'text-[#fb7185]'}">${net >= 0 ? '+' : ''}${formatINR(net)}</span>${bIntSum > 0 ? ` <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-yellow-500/15 text-yellow-300 border border-yellow-500/30">+${formatINR(bIntSum)}</span>` : ''}`;
+
+          const exitOrInt = open
+            ? (t.interest ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-yellow-500/15 text-yellow-300 border border-yellow-500/30">${esc(t.interest)}%</span>` : '—')
+            : `₹${esc(t.exit)}`;
+
+          return `
+            <tr class="hover:bg-slate-800/40">
+              <td class="py-2 px-3 whitespace-nowrap">${esc(t.date)}</td>
+              <td class="py-2 px-3 whitespace-nowrap font-extrabold text-slate-50">${esc(t.symbol)}</td>
+              <td class="py-2 px-3 whitespace-nowrap"><span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase bg-blue-500/15 text-blue-400 border border-blue-500/30">${esc(t.segment)}</span></td>
+              <td class="py-2 px-3 whitespace-nowrap"><span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase bg-purple-500/15 text-purple-300 border border-purple-500/30">${esc(t.broker || '—')}</span></td>
+              <td class="py-2 px-3 whitespace-nowrap"><span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold ${sideCls}">${sideBadge(side)}</span></td>
+              <td class="py-2 px-3 whitespace-nowrap"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-700/40 text-slate-300">${style === 'INTRADAY' ? 'Intraday' : 'Long'}</span></td>
+              <td class="py-2 px-3 whitespace-nowrap">${esc(t.qty)}</td>
+              <td class="py-2 px-3 whitespace-nowrap">₹${esc(t.entry)}</td>
+              <td class="py-2 px-3 whitespace-nowrap">${exitOrInt}</td>
+              <td class="py-2 px-3 whitespace-nowrap">₹${esc(t.fees || 0)}</td>
+              <td class="py-2 px-3 whitespace-nowrap">${netHtml}</td>
+              <td title="${esc(t.notes || '')}" class="py-2 px-3 max-w-[140px] truncate">${esc(t.notes || '')}</td>
+              <td class="py-2 px-3 whitespace-nowrap space-x-1">
+                ${isBond ? `<button type="button" data-addint="${esc(t.symbol)}" data-ibrk="${esc(t.broker)}" class="px-2 py-1 rounded bg-amber-900 border border-amber-500 text-amber-100 text-[11px] font-bold">+Int</button>` : ''}
+                <button type="button" data-edit="${esc(t.id)}" class="px-2 py-1 rounded bg-violet-900 border border-violet-600 text-white text-[11px] font-bold">✎</button>
+                <button type="button" data-del="${esc(t.id)}" class="px-2 py-1 rounded bg-red-900 border border-red-600 text-white text-[11px] font-bold">✕</button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        mCards.innerHTML = filtered.map(t => {
+          const open    = isOpen(t);
+          const net     = computeNet(t);
+          const side    = normalizeSide(t.side);
+          const style   = normalizeStyle(t);
+          const cardCls = open ? 'border-l-amber-500' : (net >= 0 ? 'border-l-emerald-500' : 'border-l-red-500');
+          const sideCls = side === 'BUY' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-rose-500/20 text-rose-300 border border-rose-500/40';
+          const isBond  = isBondSegment(t.segment);
+          const bInts   = isBond ? getBondInterestsFor(t.symbol, t.broker) : [];
+          const bIntSum = roundAmt(bInts.reduce((s, i) => s + (Number(i.amount) || 0), 0));
+          const bondKey = String(t.id);
+          const isExp   = expandedBonds.has(bondKey);
+          const hasInt  = isBond && bInts.length > 0;
+
+          const pnlHtml = open
+            ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-amber-500/15 text-amber-300 border border-amber-500/40">OPEN · ${formatINR(Number(t.qty) * Number(t.entry))}</span>`
+            : `<span class="font-extrabold text-sm ${net >= 0 ? 'text-[#34d399]' : 'text-[#fb7185]'}">${net >= 0 ? '+' : ''}${formatINR(net)}</span>`;
+
+          const intBadge = bIntSum > 0
+            ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-yellow-500/15 text-yellow-300 border border-yellow-500/30">+${formatINR(bIntSum)} Int ${isExp ? '▲' : '▼'}</span>`
+            : '';
+
+          const expandedIntHtml = (hasInt && isExp)
+            ? `<div class="flex flex-col gap-1.5 bg-[#0b1120] p-2 mt-1 border-t border-dashed border-slate-700 rounded-lg">
+                ${bInts.map(bi => `
+                  <div class="flex items-center justify-between text-[11px] text-slate-300 px-2 py-1.5 rounded bg-[#111827] border-l-2 border-l-yellow-500">
+                    <span>💰 ${esc(bi.date)}</span>
+                    <div class="flex items-center gap-1.5">
+                      <span class="text-yellow-300 font-extrabold">+${formatINR(bi.amount)}</span>
+                      <button type="button" data-delint="${esc(bi.id)}" class="px-2 py-0.5 rounded bg-red-900 text-white text-[10px] font-bold">✕</button>
+                    </div>
+                  </div>
+                `).join('')}
+               </div>`
+            : '';
+
+          return `
+            <div class="scroll-friendly bg-[#111827] border border-slate-800 border-l-4 ${cardCls} ${isExp ? 'border-yellow-500/40' : ''} rounded-xl p-3 flex flex-col gap-1.5 ${hasInt ? 'cursor-pointer' : ''}" data-bond-card="${esc(bondKey)}" data-has-int="${hasInt ? '1' : '0'}">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="font-extrabold text-sm text-slate-50">${esc(t.symbol)}</span>
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase bg-blue-500/15 text-blue-400 border border-blue-500/30">${esc(t.segment)}</span>
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase bg-purple-500/15 text-purple-300 border border-purple-500/30">${esc(t.broker || '—')}</span>
+                  ${t.interest ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-yellow-500/15 text-yellow-300 border border-yellow-500/30">${esc(t.interest)}%</span>` : ''}
+                  ${intBadge}
+                </div>
+                <div>${pnlHtml}</div>
+              </div>
+              <div class="flex items-center justify-between text-[11px] text-slate-400 flex-wrap gap-1">
+                <div>
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold ${sideCls}">${sideBadge(side)}</span>
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-700/40 text-slate-300 ml-1">${style === 'INTRADAY' ? 'Intraday' : 'Long'}</span>
+                  <span class="ml-1">${esc(t.date)}</span>
+                </div>
+                <div>Qty <b>${esc(t.qty)}</b> · In <b>₹${esc(t.entry)}</b> ${open ? '' : `→ <b>₹${esc(t.exit)}</b>`}</div>
+              </div>
+              <div class="flex items-center justify-between mt-0.5">
+                <span class="text-[11px] text-slate-300 truncate max-w-[60%]">${esc(t.notes || '')}</span>
+                <div class="flex gap-1.5">
+                  ${isBond ? `<button type="button" data-addint="${esc(t.symbol)}" data-ibrk="${esc(t.broker)}" class="px-2.5 py-1 rounded-lg bg-amber-900 border border-amber-500 text-amber-100 font-bold text-[11px]">+ Int</button>` : ''}
+                  <button type="button" data-edit="${esc(t.id)}" class="px-2.5 py-1 rounded-lg bg-violet-900 border border-violet-600 text-white font-bold text-[11px]">✎</button>
+                  <button type="button" data-del="${esc(t.id)}" class="px-2.5 py-1 rounded-lg bg-red-900 border border-red-600 text-white font-bold text-[11px]">✕</button>
+                </div>
+              </div>
+              ${expandedIntHtml}
+            </div>
+          `;
+        }).join('');
+
+        mCards.querySelectorAll('[data-bond-card]').forEach(card => {
+          card.addEventListener('click', (e) => {
+            if (e.target.closest('button')) return;
+            if (card.dataset.hasInt !== '1') return;
+            const k = card.dataset.bondCard;
+            if (expandedBonds.has(k)) expandedBonds.delete(k);
+            else expandedBonds.add(k);
+            renderAll();
+          });
+        });
+
+        document.querySelectorAll('#view-trades [data-addint]').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            setTab('main');
+            openBondInterestBox(btn.dataset.addint, btn.dataset.ibrk);
+          });
+        });
+
+        document.querySelectorAll('#view-trades [data-delint]').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            bondInterests = bondInterests.filter(x => String(x.id) !== String(btn.dataset.delint));
+            saveInterests();
+            renderAll();
+          });
+        });
+
+        document.querySelectorAll('#view-trades [data-edit]').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const t = trades.find(x => String(x.id) === String(btn.dataset.edit));
+            if (t) startEdit(t);
+          });
+        });
+
+        document.querySelectorAll('#view-trades [data-del]').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const ok = await openDialog({
+              title: 'Delete Trade',
+              message: 'Delete this trade permanently?',
+              confirmText: 'Delete',
+              isDanger: true
+            });
+            if (ok) deleteTradeById(btn.dataset.del);
+          });
+        });
+      };
+
+      // ── Settings Databases ───────────────────────────────────────────────
+      const addSymbolsFromString = (raw, segment, code = '') => {
+        const parts = String(raw).split(/[,;\n]+/).map(s => s.trim().toUpperCase()).filter(Boolean);
+        let added = 0;
+        parts.forEach(sym => {
+          const existing = symbols.find(s => s.symbol === sym);
+          if (!existing) {
+            symbols.push({ symbol: sym, segment: segment || segments[0] || 'Stocks', code: String(code || '').trim() });
+            added++;
+          } else if (code) {
+            existing.code = String(code).trim();
+            added++;
+          }
+        });
+        if (added) {
+          saveSymbols();
+          renderSettingsLists();
+        }
+        return added;
+      };
+
+      const renderSettingsLists = () => {
+        const segList = document.getElementById('set-seg-list');
+        if (segList) {
+          segList.innerHTML = segments.map(seg => `
+            <div class="inline-flex items-center gap-1.5 bg-slate-800 border border-slate-700 px-3 py-1 rounded-full text-[11px]">
+              <b>${esc(seg)}</b>
+              ${segments.length > 1 ? `<span class="cursor-pointer text-[#fb7185] font-bold" data-rmseg="${esc(seg)}">×</span>` : ''}
+            </div>
+          `).join('');
+          segList.querySelectorAll('[data-rmseg]').forEach(el => {
+            el.addEventListener('click', () => {
+              segments = segments.filter(s => s !== el.dataset.rmseg);
+              saveSegments();
+              refreshAllSelects();
+              renderSettingsLists();
+            });
+          });
+        }
+
+        document.getElementById('set-brk-count').textContent = brokers.length;
+        const brkList = document.getElementById('set-brk-list');
+        if (brkList) {
+          brkList.innerHTML = brokers.length
+            ? brokers.map((b, idx) => `
+              <div class="inline-flex items-center gap-1.5 bg-slate-800 border border-slate-700 px-3 py-1 rounded-full text-[11px]">
+                <b>${esc(b)}</b>
+                <span class="cursor-pointer text-[#38bdf8] font-bold" data-editbrk="${idx}">✎</span>
+                <span class="cursor-pointer text-[#fb7185] font-bold" data-rmbrk="${idx}">×</span>
+              </div>
+            `).join('')
+            : `<span class="text-[11px] text-slate-500">No brokers.</span>`;
+
+          brkList.querySelectorAll('[data-editbrk]').forEach(el => {
+            el.addEventListener('click', async () => {
+              const idx = Number(el.dataset.editbrk);
+              const oldName = brokers[idx];
+              const nextName = await openDialog({
+                title: 'Rename Broker',
+                message: 'Enter updated broker name:',
+                showInput: true,
+                defaultValue: oldName,
+                confirmText: 'Rename'
+              });
+              if (!nextName || !nextName.trim() || nextName.trim() === oldName) return;
+              const clean = nextName.trim();
+              brokers[idx] = clean;
+              trades.forEach(t => { if (t.broker === oldName) t.broker = clean; });
+              bondInterests.forEach(bi => { if (bi.broker === oldName) bi.broker = clean; });
+              saveBrokers();
+              saveTrades();
+              saveInterests();
+              refreshAllSelects();
+              renderSettingsLists();
+              renderAll();
+            });
+          });
+
+          brkList.querySelectorAll('[data-rmbrk]').forEach(el => {
+            el.addEventListener('click', () => {
+              brokers.splice(Number(el.dataset.rmbrk), 1);
+              saveBrokers();
+              refreshAllSelects();
+              renderSettingsLists();
+            });
+          });
+        }
+
+        const sortedSyms = symbols.slice().sort((a, b) => a.symbol.localeCompare(b.symbol));
+        document.getElementById('set-sym-count').textContent = sortedSyms.length;
+        const setSymList = document.getElementById('set-sym-list');
+        if (setSymList) {
+          setSymList.innerHTML = sortedSyms.length
+            ? sortedSyms.map(s => {
+              const cmp = getCachedCmp(s.symbol);
+              return `
+                <div class="inline-flex items-center gap-1.5 bg-slate-800 border border-slate-700 px-3 py-1 rounded-full text-[11px]">
+                  <b>${esc(s.symbol)}</b>
+                  <span class="text-[#38bdf8] text-[10px]">${esc(s.segment)}${s.code ? ` (${esc(s.code)})` : ''}</span>
+                  ${cmp ? `<span class="text-[#34d399] text-[10px]">₹${cmp}</span>` : ''}
+                  <span class="cursor-pointer text-amber-400 font-bold" data-setcmp="${esc(s.symbol)}" title="Set manual CMP/NAV">₹</span>
+                  <span class="cursor-pointer text-[#fb7185] font-bold" data-rmsym="${esc(s.symbol)}">×</span>
+                </div>
+              `;
+            }).join('')
+            : `<span class="text-[11px] text-slate-500">No symbols.</span>`;
+
+          setSymList.querySelectorAll('[data-setcmp]').forEach(el => {
+            el.addEventListener('click', async () => {
+              const sym = el.dataset.setcmp;
+              const cur = getCachedCmp(sym) || '';
+              const val = await openDialog({
+                title: `Set Manual CMP / NAV`,
+                message: `Enter current CMP / NAV for ${sym}:`,
+                showInput: true,
+                defaultValue: String(cur),
+                confirmText: 'Save Price'
+              });
+              if (val === null) return;
+              const num = parseFloat(val);
+              if (!Number.isNaN(num) && num > 0) {
+                priceCache[sym] = { price: roundAmt(num), updatedAt: new Date().toISOString() };
+                savePrices();
+                renderSettingsLists();
+                renderAll();
+              }
+            });
+          });
+
+          setSymList.querySelectorAll('[data-rmsym]').forEach(el => {
+            el.addEventListener('click', () => {
+              symbols = symbols.filter(x => x.symbol !== el.dataset.rmsym);
+              saveSymbols();
+              renderSettingsLists();
+            });
+          });
+        }
+      };
+
+      // ── Smart Suggestions Dropdown ───────────────────────────────────────
+      const dropdown = document.getElementById('tdi-sym-dropdown');
+
+      const getAllKnownSymbols = () => {
+        const map = new Map();
+        symbols.forEach(s => map.set(s.symbol.toUpperCase(), { symbol: s.symbol.toUpperCase(), segment: s.segment }));
+        trades.forEach(t => {
+          const sym = (t.symbol || '').toUpperCase();
+          if (sym && !map.has(sym)) map.set(sym, { symbol: sym, segment: t.segment || 'Stocks' });
+        });
+        return Array.from(map.values()).sort((a, b) => a.symbol.localeCompare(b.symbol));
+      };
+
+      const hideSymDropdown = () => {
+        if (dropdown) dropdown.classList.add('hidden');
+      };
+
+      const showAutocomplete = (targetInput, mode) => {
+        if (!dropdown || !targetInput) return;
+        const q = String(targetInput.value).trim().toUpperCase();
+        const allSyms = getAllKnownSymbols();
+        const matches = allSyms.filter(s => !q || s.symbol.includes(q)).slice(0, 20);
+        const exactExists = allSyms.some(s => s.symbol === q);
+
+        if (!matches.length && (!q || mode === 'search')) {
+          hideSymDropdown();
+          return;
+        }
+
+        let html = matches.map(s => {
+          const openQty = roundQty(trades
+            .filter(t => isOpen(t) && normalizeSide(t.side) === 'BUY' && (t.symbol || '').toUpperCase() === s.symbol)
+            .reduce((sum, t) => sum + (Number(t.qty) || 0), 0));
+          const openTag = openQty > 0 ? `<span class="ml-1.5 text-amber-400 text-[10px]">Open: ${openQty}</span>` : '';
+
+          return `
+            <div class="px-3 py-2.5 cursor-pointer flex items-center justify-between hover:bg-slate-700" data-pick-sym="${esc(s.symbol)}">
+              <div><b>${esc(s.symbol)}</b>${openTag}</div>
+              <span class="text-[#38bdf8] text-[11px]">${esc(s.segment)}</span>
+            </div>
+          `;
+        }).join('');
+
+        if (mode === 'form' && q && !exactExists) {
+          html += `
+            <div class="px-3 py-2.5 cursor-pointer flex items-center justify-between hover:bg-slate-700 text-[#38bdf8] font-bold" data-add-sym="${esc(q)}">
+              <span>+ Save "${esc(q)}"</span>
+            </div>
+          `;
+        }
+
+        dropdown.innerHTML = html;
+
+        dropdown.querySelectorAll('[data-pick-sym]').forEach(item => {
+          item.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const sym = item.dataset.pickSym;
+            const found = allSyms.find(x => x.symbol === sym);
+
+            if (mode === 'search') {
+              filters.query = sym;
+              hideSymDropdown();
+              renderAll();
+            } else {
+              targetInput.value = sym;
+              if (found && segments.includes(found.segment)) {
+                document.getElementById('t-seg').value = found.segment;
+                updateFormMode();
+              }
+              hideSymDropdown();
+              updateOpenReminder();
+              document.getElementById('t-qty').focus();
+            }
+          });
+        });
+
+        dropdown.querySelectorAll('[data-add-sym]').forEach(item => {
+          item.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const sym = item.dataset.addSym;
+            addSymbolsFromString(sym, document.getElementById('t-seg').value);
+            targetInput.value = sym;
+            hideSymDropdown();
+            updateOpenReminder();
+            setStatus(`Saved ${sym}`);
+          });
+        });
+
+        const rect = targetInput.getBoundingClientRect();
+        const width = Math.max(rect.width, 210);
+        const left = Math.min(rect.left, window.innerWidth - width - 12);
+        dropdown.style.left = `${Math.max(8, left)}px`;
+        dropdown.style.top = `${rect.bottom + 4}px`;
+        dropdown.style.width = `${width}px`;
+        dropdown.classList.remove('hidden');
+      };
+
+      // ── Edit Mode ────────────────────────────────────────────────────────
+      const startEdit = (t) => {
+        editingId = t.id;
+        setEntryOpen(true);
+        document.getElementById('t-date').value     = t.date || '';
+        document.getElementById('t-sym').value      = t.symbol || '';
+        if (segments.includes(t.segment)) document.getElementById('t-seg').value = t.segment;
+        if (brokers.includes(t.broker))   document.getElementById('t-broker').value = t.broker;
+        document.getElementById('t-side').value     = normalizeSide(t.side);
+        document.getElementById('t-style').value    = normalizeStyle(t);
+        document.getElementById('t-qty').value      = t.qty ?? '';
+        document.getElementById('t-entry').value    = t.entry ?? '';
+        document.getElementById('t-interest').value = t.interest ?? '';
+        document.getElementById('t-exit').value     = (t.exit == null || t.exit === '') ? '' : t.exit;
+        document.getElementById('t-fees').value     = t.fees ?? 0;
+        document.getElementById('t-notes').value    = t.notes || '';
+        updateFormMode();
+        document.getElementById('tdi-form-submit').textContent = 'Update';
+        document.getElementById('tdi-form-cancel').classList.remove('hidden');
+        updateOpenReminder();
+        setStatus(`Editing ${t.symbol}`);
+      };
+
+      const cancelEdit = () => {
+        editingId = null;
+        ['t-sym', 't-notes', 't-exit', 't-qty', 't-entry', 't-interest'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+        document.getElementById('t-fees').value = '0';
+        document.getElementById('t-side').value = 'BUY';
+        document.getElementById('t-date').valueAsDate = new Date();
+        updateFormMode();
+        document.getElementById('tdi-form-submit').textContent = '+ Save';
+        document.getElementById('tdi-form-cancel').classList.add('hidden');
+        updateOpenReminder();
+        setStatus('Ready');
+      };
+
+      // ── Multi-Device GitHub Gist Sync & Update Detection ────────────────
+      const gistRequest = async (method, url, body = null) => {
+        return fetch(url, {
+          method,
+          headers: {
+            'Authorization': `Bearer ${gistConfig.token}`,
+            'Accept': 'application/vnd.github+json',
+            'X-GitHub-Api-Version': '2022-11-28',
+            'Content-Type': 'application/json'
+          },
+          body: body ? JSON.stringify(body) : null
+        });
+      };
+
+      const applyRemoteData = (parsed) => {
+        if (Array.isArray(parsed.trades))        trades = parsed.trades;
+        if (Array.isArray(parsed.bondInterests)) bondInterests = parsed.bondInterests;
+        if (Array.isArray(parsed.symbols))       symbols = parsed.symbols;
+        if (Array.isArray(parsed.segments) && parsed.segments.length) segments = parsed.segments;
+        if (Array.isArray(parsed.brokers))       brokers = parsed.brokers;
+
+        pruneOrphanedBondInterests(false);
+
+        lsSet('tdi_trades', trades);
+        lsSet('tdi_bond_interests', bondInterests);
+        lsSet('tdi_symbols', symbols);
+        lsSet('tdi_segments', segments);
+        lsSet('tdi_brokers', brokers);
+
+        const ts = parsed.updatedAt || new Date().toISOString();
+        lastSyncedAt = ts;
+        lsSet('tdi_last_synced_at', ts);
+        setUnsyncedState(false);
+
+        refreshAllSelects();
+        renderSettingsLists();
+        renderAll();
+      };
+
+      const checkRemoteGistForUpdates = async () => {
+        if (!gistConfig.token || !gistConfig.gistId) return;
+        try {
+          const res = await gistRequest('GET', `https://api.github.com/gists/${encodeURIComponent(gistConfig.gistId)}`);
+          if (!res.ok) return;
+          const data = await res.json();
+          const files = data.files || {};
+          const fileObj = files['trade-diary-india.json'] || Object.values(files)[0];
+          if (!fileObj || !fileObj.content) return;
+
+          const parsed = JSON.parse(fileObj.content);
+          const remoteTime = parsed.updatedAt || data.updated_at || '';
+          const fromAnotherDevice = parsed.deviceId && parsed.deviceId !== deviceId;
+          const isNewerThanLocal = remoteTime && (!lastSyncedAt || new Date(remoteTime).getTime() > new Date(lastSyncedAt).getTime() + 1000);
+
+          if (isNewerThanLocal || (fromAnotherDevice && !lastSyncedAt)) {
+            remotePendingPayload = parsed;
+            const popup = document.getElementById('tdi-sync-popup');
+            const msgEl = document.getElementById('tdi-sync-popup-msg');
+            if (popup && msgEl) {
+              const when = remoteTime ? new Date(remoteTime).toLocaleString() : 'latest';
+              msgEl.textContent = `☁️ Newer backup on cloud (${when}). Load latest?`;
+              popup.classList.remove('hidden');
+            }
+          }
+        } catch (e) {}
+      };
+
+      const pushToGist = async () => {
+        if (!gistConfig.token) {
+          setTab('settings');
+          return setStatus('Enter Token first', true);
+        }
+        pruneOrphanedBondInterests(false);
+        setStatus('Syncing...');
+        const nowIso = new Date().toISOString();
+        const content = JSON.stringify({
+          deviceId,
+          updatedAt: nowIso,
+          trades,
+          bondInterests,
+          symbols,
+          segments,
+          brokers
+        }, null, 2);
+
+        const body = {
+          description: 'Trade Diary India Backup',
+          public: false,
+          files: { 'trade-diary-india.json': { content } }
+        };
+
+        try {
+          const isUpdate = Boolean(gistConfig.gistId);
+          const url = isUpdate
+            ? `https://api.github.com/gists/${encodeURIComponent(gistConfig.gistId)}`
+            : 'https://api.github.com/gists';
+          const res = await gistRequest(isUpdate ? 'PATCH' : 'POST', url, body);
+          if (res.ok) {
+            const parsed = await res.json();
+            if (!gistConfig.gistId && parsed.id) {
+              gistConfig.gistId = parsed.id;
+              saveConfig();
+              document.getElementById('gh-gist-id').value = parsed.id;
+            }
+            lastSyncedAt = nowIso;
+            lsSet('tdi_last_synced_at', nowIso);
+            setUnsyncedState(false);
+            document.getElementById('tdi-sync-popup')?.classList.add('hidden');
+            setStatus('Synced!');
+          } else {
+            setStatus(`Sync Error (${res.status})`, true);
+          }
+        } catch (e) {
+          setStatus('Network error', true);
+        }
+      };
+
+      const pullFromGist = async () => {
+        if (!gistConfig.token || !gistConfig.gistId) return setStatus('Need Token & ID', true);
+        setStatus('Loading...');
+        try {
+          const res = await gistRequest('GET', `https://api.github.com/gists/${encodeURIComponent(gistConfig.gistId)}`);
+          if (res.ok) {
+            const data = await res.json();
+            const files = data.files || {};
+            const fileObj = files['trade-diary-india.json'] || Object.values(files)[0];
+            if (!fileObj || !fileObj.content) return setStatus('Empty Gist', true);
+            const parsed = JSON.parse(fileObj.content);
+            applyRemoteData(parsed);
+            document.getElementById('tdi-sync-popup')?.classList.add('hidden');
+            setStatus(`Loaded ${trades.length}`);
+          } else {
+            setStatus(`Error (${res.status})`, true);
+          }
+        } catch (e) {
+          setStatus('Parse error', true);
+        }
+      };
+
+      // ── Backup / Restore ─────────────────────────────────────────────────
+      const buildExportJSON = () => {
+        pruneOrphanedBondInterests(false);
+        return JSON.stringify({
+          version: '10.0.0',
+          exportedAt: new Date().toISOString(),
+          trades,
+          bondInterests,
+          symbols,
+          segments,
+          brokers
+        }, null, 2);
+      };
+
+      const importData = async (text) => {
+        if (!text || !text.trim()) return setStatus('Nothing to import', true);
+        let data;
+        try { data = JSON.parse(text); } catch (e) { return setStatus('Invalid JSON', true); }
+
+        const newTrades = Array.isArray(data) ? data : (Array.isArray(data?.trades) ? data.trades : null);
+        if (!newTrades) return setStatus('Invalid format', true);
+
+        const ok = await openDialog({
+          title: 'Restore Backup',
+          message: `Restore ${newTrades.length} trades?`,
+          confirmText: 'Restore'
+        });
+        if (!ok) return;
+
+        trades = newTrades;
+        bondInterests = Array.isArray(data?.bondInterests) ? data.bondInterests : [];
+        if (Array.isArray(data?.symbols)) symbols = data.symbols;
+        if (Array.isArray(data?.segments) && data.segments.length) segments = data.segments;
+        if (Array.isArray(data?.brokers)) brokers = data.brokers;
+
+        pruneOrphanedBondInterests(false);
+        saveTrades(); saveInterests(); saveSymbols(); saveSegments(); saveBrokers();
+        refreshAllSelects();
+        renderSettingsLists();
+        renderAll();
+        setStatus(`Restored ${trades.length}`);
+      };
+
+      // ── Event Wiring ─────────────────────────────────────────────────────
+      const wireEvents = () => {
+        document.getElementById('t-date').valueAsDate = new Date();
+        document.getElementById('int-date').valueAsDate = new Date();
+
+        // Tab Switching (Desktop + Mobile Bottom Nav)
+        document.querySelectorAll('[data-tab]').forEach(btn => {
+          btn.addEventListener('click', () => setTab(btn.dataset.tab));
+        });
+
+        // Entry Toggle (Header + and Mobile Centered FAB +)
+        const toggleEntry = () => {
+          setEntryOpen(!entryOpen);
+          if (entryOpen) document.getElementById('t-sym').focus();
+        };
+        document.getElementById('tdi-entry-toggle').addEventListener('click', toggleEntry);
+        document.getElementById('tdi-mobile-fab').addEventListener('click', toggleEntry);
+
+        document.getElementById('tdi-refresh-cmp').addEventListener('click', refreshLivePrices);
+        document.getElementById('tdi-filter-toggle').addEventListener('click', toggleFilters);
+        document.getElementById('tdi-cloud-btn').addEventListener('click', pushToGist);
+        document.getElementById('tdi-settings-btn').addEventListener('click', () => {
+          setTab(activeTab === 'settings' ? 'main' : 'settings');
+        });
+        document.getElementById('tdi-back-main').addEventListener('click', () => setTab('main'));
+
+        // Multi-device Sync Banner
+        document.getElementById('tdi-load-latest-btn').addEventListener('click', () => {
+          if (remotePendingPayload) {
+            applyRemoteData(remotePendingPayload);
+            remotePendingPayload = null;
+            document.getElementById('tdi-sync-popup').classList.add('hidden');
+            setStatus(`Loaded ${trades.length}`);
+          } else {
+            pullFromGist();
+          }
+        });
+        document.getElementById('tdi-dismiss-sync-btn').addEventListener('click', () => {
+          document.getElementById('tdi-sync-popup').classList.add('hidden');
+        });
+
+        document.getElementById('t-seg').addEventListener('change', updateFormMode);
+        document.getElementById('t-side').addEventListener('change', updateFormMode);
+
+        // Filter Bindings
+        const bindFilter = (id, key, isYear = false) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          const evt = el.tagName === 'INPUT' ? 'input' : 'change';
+          el.addEventListener(evt, (e) => {
+            filters[key] = e.target.value;
+            if (isYear) saveYear();
+            renderAll();
+          });
+        };
+
+        bindFilter('f-year', 'year', true);
+        bindFilter('f-month', 'month');
+        bindFilter('f-seg', 'seg');
+        bindFilter('f-broker', 'broker');
+        bindFilter('f-side', 'side');
+        bindFilter('f-style', 'style');
+        bindFilter('f-outcome', 'outcome');
+        bindFilter('f-status', 'status');
+        bindFilter('f-query', 'query');
+
+        document.getElementById('f-reset').addEventListener('click', () => {
+          filters = { year: 'all', month: 'all', seg: 'all', broker: 'all', side: 'all', style: 'all', status: 'all', outcome: 'all', query: '' };
+          saveYear();
+          renderAll();
+        });
+
+        // Autocomplete & Open Qty Reminder
+        const topSearch = document.getElementById('f-query');
+        topSearch.addEventListener('focus', () => showAutocomplete(topSearch, 'search'));
+        topSearch.addEventListener('input', () => showAutocomplete(topSearch, 'search'));
+
+        const formSym = document.getElementById('t-sym');
+        formSym.addEventListener('focus', () => showAutocomplete(formSym, 'form'));
+        formSym.addEventListener('input', () => {
+          showAutocomplete(formSym, 'form');
+          updateOpenReminder();
+        });
+
+        document.addEventListener('pointerdown', (e) => {
+          if (!e.target.closest('#f-query') && !e.target.closest('#t-sym') && !e.target.closest('#tdi-sym-dropdown')) {
+            hideSymDropdown();
+          }
+        }, true);
+
+        // Bond Interest Controls
+        document.getElementById('tdi-open-int-btn').addEventListener('click', () => openBondInterestBox());
+        document.getElementById('int-cancel-btn').addEventListener('click', () => {
+          const box = document.getElementById('tdi-interest-box');
+          box.classList.add('hidden');
+          box.classList.remove('flex');
+        });
+        document.getElementById('int-save-btn').addEventListener('click', () => {
+          const date   = document.getElementById('int-date').value;
+          const amount = roundAmt(parseFloat(document.getElementById('int-amount').value));
+          if (!date || Number.isNaN(amount) || amount <= 0) {
+            return setStatus('Enter date & amount', true);
+          }
+          const sym = interestModalTarget?.symbol || (document.getElementById('t-sym').value || '').trim().toUpperCase();
+          const brk = interestModalTarget?.broker || document.getElementById('t-broker').value || '';
+          if (!sym || !hasMatchingBondTrade(sym, brk)) {
+            return setStatus('Save bond trade first', true);
+          }
+          bondInterests.push({ id: Date.now(), date, symbol: sym, broker: brk, amount });
+          saveInterests();
+          const box = document.getElementById('tdi-interest-box');
+          box.classList.add('hidden');
+          box.classList.remove('flex');
+          renderAll();
+          setStatus(`Added ${formatINR(amount)}`);
+        });
+
+        // Submit Trade
+        document.getElementById('tdi-trade-form').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const exitRaw  = document.getElementById('t-exit').value.trim();
+          const intRaw   = document.getElementById('t-interest').value.trim();
+          const symbol   = document.getElementById('t-sym').value.split(/[,;\n]+/)[0].trim().toUpperCase();
+          const side     = normalizeSide(document.getElementById('t-side').value);
+          const qtyVal   = roundQty(parseFloat(document.getElementById('t-qty').value));
+          const entryVal = roundAmt(parseFloat(document.getElementById('t-entry').value));
+
+          if (!symbol || Number.isNaN(qtyVal) || qtyVal <= 0 || Number.isNaN(entryVal) || entryVal <= 0) {
+            return setStatus('Enter symbol, qty & price', true);
+          }
+
+          const data = {
+            date:     document.getElementById('t-date').value || new Date().toISOString().slice(0, 10),
+            symbol,
+            segment:  document.getElementById('t-seg').value,
+            broker:   document.getElementById('t-broker').value,
+            side,
+            style:    document.getElementById('t-style').value,
+            qty:      qtyVal,
+            entry:    entryVal,
+            interest: intRaw === '' ? '' : parseFloat(intRaw),
+            exit:     exitRaw === '' ? null : roundAmt(parseFloat(exitRaw)),
+            fees:     roundAmt(parseFloat(document.getElementById('t-fees').value) || 0),
+            notes:    document.getElementById('t-notes').value.trim()
+          };
+
+          if (!symbols.some(s => s.symbol === data.symbol)) {
+            addSymbolsFromString(data.symbol, data.segment);
+          }
+
+          if (editingId != null) {
+            const idx = trades.findIndex(t => String(t.id) === String(editingId));
+            if (idx >= 0) {
+              const prev = trades[idx];
+              trades[idx] = { ...prev, ...data };
+              if (isBondSegment(prev.segment) && isBondSegment(data.segment)) {
+                bondInterests.forEach(bi => {
+                  if (String(bi.symbol || '').toUpperCase() === String(prev.symbol || '').toUpperCase() &&
+                      (bi.broker || '') === (prev.broker || '')) {
+                    bi.symbol = data.symbol;
+                    bi.broker = data.broker;
+                  }
+                });
+                saveInterests();
+              }
+            }
+            pruneOrphanedBondInterests(false);
+            cancelEdit();
+            setEntryOpen(false);
+            setStatus('Updated');
+          } else if (data.side === 'SELL') {
+            const matched = processAutoSellMatch(data);
+            if (!matched) {
+              trades.push({ id: Date.now(), ...data, exit: null });
+              setStatus(`Saved ${data.symbol} sell`);
+            }
+            ['t-sym', 't-notes', 't-exit', 't-qty', 't-entry', 't-interest'].forEach(id => {
+              document.getElementById(id).value = '';
+            });
+            document.getElementById('t-side').value = 'BUY';
+            updateFormMode();
+            setEntryOpen(false);
+          } else {
+            trades.push({ id: Date.now(), ...data });
+            ['t-sym', 't-notes', 't-exit', 't-qty', 't-entry', 't-interest'].forEach(id => {
+              document.getElementById(id).value = '';
+            });
+            setStatus('Saved');
+            setEntryOpen(false);
+          }
+
+          saveTrades();
+          renderAll();
+        });
+
+        document.getElementById('tdi-form-cancel').addEventListener('click', () => {
+          cancelEdit();
+          setEntryOpen(false);
+        });
+
+        // Settings
+        document.getElementById('seg-add-btn').addEventListener('click', () => {
+          const val = document.getElementById('seg-new-name').value.trim();
+          if (!val) return;
+          if (!segments.some(s => s.toLowerCase() === val.toLowerCase())) {
+            segments.push(val);
+            saveSegments();
+            refreshAllSelects();
+            renderSettingsLists();
+          }
+          document.getElementById('seg-new-name').value = '';
+        });
+
+        document.getElementById('seg-reset-btn').addEventListener('click', () => {
+          segments = DEFAULT_SEGMENTS.slice();
+          saveSegments();
+          refreshAllSelects();
+          renderSettingsLists();
+        });
+
+        document.getElementById('brk-add-btn').addEventListener('click', () => {
+          const val = document.getElementById('brk-new-name').value.trim();
+          if (!val) return;
+          if (!brokers.some(b => b.toLowerCase() === val.toLowerCase())) {
+            brokers.push(val);
+            saveBrokers();
+            refreshAllSelects();
+            renderSettingsLists();
+          }
+          document.getElementById('brk-new-name').value = '';
+        });
+
+        document.getElementById('sym-add-btn').addEventListener('click', () => {
+          const raw  = document.getElementById('sym-new-name').value;
+          const seg  = document.getElementById('sym-new-seg').value;
+          const code = document.getElementById('sym-new-code').value;
+          const added = addSymbolsFromString(raw, seg, code);
+          if (added > 0) {
+            document.getElementById('sym-new-name').value = '';
+            document.getElementById('sym-new-code').value = '';
+            setStatus(`Added ${added}`);
+          }
+        });
+
+        document.getElementById('gh-save-btn').addEventListener('click', () => {
+          gistConfig = {
+            token:  document.getElementById('gh-token').value.trim(),
+            gistId: document.getElementById('gh-gist-id').value.trim()
+          };
+          saveConfig();
+          setStatus('Saved');
+          checkRemoteGistForUpdates();
+        });
+        document.getElementById('gist-push-btn').addEventListener('click', pushToGist);
+        document.getElementById('gist-pull-btn').addEventListener('click', pullFromGist);
+
+        document.getElementById('data-copy-btn').addEventListener('click', () => {
+          const ta = document.getElementById('data-textarea');
+          ta.value = buildExportJSON();
+          ta.select();
+          try {
+            document.execCommand('copy');
+            setStatus('Copied');
+          } catch (e) {
+            setStatus('In box below');
+          }
+        });
+
+        document.getElementById('data-download-btn').addEventListener('click', () => {
+          const blob = new Blob([buildExportJSON()], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `trade-diary-${new Date().toISOString().slice(0, 10)}.json`;
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        });
+
+        document.getElementById('data-file-btn').addEventListener('click', () => document.getElementById('data-file-input').click());
+        document.getElementById('data-file-input').addEventListener('change', (e) => {
+          const f = e.target.files[0];
+          if (!f) return;
+          const r = new FileReader();
+          r.onload = (ev) => importData(ev.target.result);
+          r.readAsText(f);
+          e.target.value = '';
+        });
+
+        document.getElementById('data-paste-btn').addEventListener('click', () => importData(document.getElementById('data-textarea').value));
+
+        document.getElementById('data-wipe-btn').addEventListener('click', async () => {
+          const ok = await openDialog({
+            title: 'Wipe All Data',
+            message: 'Delete ALL data permanently?',
+            confirmText: 'Wipe All',
+            isDanger: true
+          });
+          if (!ok) return;
+          trades = []; bondInterests = []; symbols = []; priceCache = {};
+          saveTrades(); saveInterests(); saveSymbols(); savePrices();
+          renderSettingsLists(); renderAll();
+          setStatus('Cleared');
+        });
+
+        // Re-check remote Gist updates when returning to app
+        window.addEventListener('focus', checkRemoteGistForUpdates);
+      };
+
+      // ── Initialize App ───────────────────────────────────────────────────
+      wireEvents();
+      refreshAllSelects();
+      updateFormMode();
+      updateSyncVisuals();
+      renderSettingsLists();
+      renderAll();
+      checkRemoteGistForUpdates();
+    })();
+  </script>
+</body>
+</html>
