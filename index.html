@@ -82,6 +82,26 @@
       touch-action: pan-y;
     }
 
+    button, a, label[for] {
+      touch-action: manipulation;
+    }
+
+    /* Attachment Lightbox Modal — Strictly hidden & non-blocking until .open */
+    #tdi-att-modal {
+      display: none !important;
+      pointer-events: none !important;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(2, 6, 23, 0.92);
+      backdrop-filter: blur(8px);
+      flex-direction: column;
+    }
+    #tdi-att-modal.open {
+      display: flex !important;
+      pointer-events: auto !important;
+    }
+
     /* Prevent mobile browser auto-zoom on form fields */
     input, select, textarea {
       font-size: 16px !important;
@@ -622,8 +642,30 @@
   <!-- ==================== MOBILE BOTTOM NAVIGATION BAR (<= 768px) ==================== -->
   <nav class="md:hidden fixed bottom-0 inset-x-0 z-40 bottom-nav-safe bg-[#0f172a]/95 backdrop-blur-md border-t border-slate-800 px-3 pt-1.5 flex items-center justify-around" aria-label="Mobile Navigation">
     <button type="button" data-tab="main" class="tdi-tab-mobile flex flex-col items-center gap-0.5 py-1.5 px-4 text-sky-400 font-bold text-[11px]">
+      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
+      </svg>
+      <span>Main</span>
+    </button>
+
+    <button type="button" id="tdi-mobile-fab" title="Add Entry"
+      class="-mt-5 w-12 h-12 rounded-full bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-extrabold text-xl flex items-center justify-center shadow-lg shadow-sky-500/40 ring-4 ring-[#090d16] active:scale-95 transition">
+      +
+    </button>
+
+    <button type="button" data-tab="trades" class="tdi-tab-mobile flex flex-col items-center gap-0.5 py-1.5 px-4 text-slate-400 font-semibold text-[11px]">
+      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Trades (<span class="tdi-tab-count">0</span>)</span>
+    </button>
+  </nav>
+
+  <!-- ==================== SMART AUTOCOMPLETE DROPDOWN ==================== -->
+  <div id="tdi-sym-dropdown" class="hidden fixed z-50 bg-slate-800 border border-sky-400 rounded-xl max-h-56 overflow-y-auto shadow-2xl text-xs text-slate-50 divide-y divide-slate-700"></div>
+
   <!-- ==================== FULL-SCREEN ATTACHMENT LIGHTBOX VIEWER ==================== -->
-  <div id="tdi-lightbox-overlay" class="hidden fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex flex-col">
+  <div id="tdi-att-modal" role="dialog" aria-modal="true" aria-labelledby="tdi-lb-title">
     <div class="header-safe flex items-center justify-between gap-2 px-3 sm:px-6 py-2.5 bg-[#0f172a] border-b border-slate-800 shrink-0">
       <div class="min-w-0">
         <div id="tdi-lb-title" class="text-xs sm:text-sm font-extrabold text-slate-50 truncate">Attachment</div>
@@ -642,7 +684,7 @@
       </div>
     </div>
     <div id="tdi-lb-body" class="flex-1 min-h-0 overflow-auto p-3 sm:p-6 flex items-center justify-center">
-      <div id="tdi-lb-loader" class="text-xs font-semibold text-sky-300">Loading attachment...</div>
+      <div id="tdi-lb-loader" class="text-xs font-semibold text-sky-300"></div>
       <img id="tdi-lb-img" src="" alt="Trade Attachment" class="hidden max-w-full max-h-[82vh] object-contain rounded-xl shadow-2xl border border-slate-800" />
       <iframe id="tdi-lb-pdf" src="" title="PDF Attachment" class="hidden w-full h-[80vh] rounded-xl border border-slate-800 bg-white"></iframe>
     </div>
@@ -906,27 +948,39 @@
       };
 
       // ── IndexedDB Local Attachment Cache (tdi_attachments_db) ────────────
-      const openAttachmentDb = () => new Promise((resolve, reject) => {
-        if (!window.indexedDB) return reject(new Error('IndexedDB unavailable'));
-        const req = indexedDB.open('tdi_attachments_db', 1);
-        req.onupgradeneeded = (e) => {
-          const db = e.target.result;
-          if (!db.objectStoreNames.contains('files')) {
-            db.createObjectStore('files', { keyPath: 'id' });
-          }
-        };
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
+      const openAttDb = () => new Promise((resolve) => {
+        try {
+          if (!window.indexedDB) return resolve(null);
+          const req = indexedDB.open('tdi_attachments_db', 1);
+          req.onupgradeneeded = (e) => {
+            try {
+              const db = e.target.result;
+              if (!db.objectStoreNames.contains('files')) {
+                db.createObjectStore('files', { keyPath: 'id' });
+              }
+            } catch (err) {}
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => resolve(null);
+          req.onblocked = () => resolve(null);
+        } catch (e) {
+          resolve(null);
+        }
       });
 
       const idbPutAttachment = async (id, blob, meta = {}) => {
         try {
-          const db = await openAttachmentDb();
-          return await new Promise((resolve, reject) => {
-            const tx = db.transaction('files', 'readwrite');
-            tx.objectStore('files').put({ id, blob, ...meta, cachedAt: Date.now() });
-            tx.oncomplete = () => resolve(true);
-            tx.onerror = () => reject(tx.error);
+          const db = await openAttDb();
+          if (!db) return false;
+          return await new Promise((resolve) => {
+            try {
+              const tx = db.transaction('files', 'readwrite');
+              tx.objectStore('files').put({ id, blob, ...meta, cachedAt: Date.now() });
+              tx.oncomplete = () => resolve(true);
+              tx.onerror = () => resolve(false);
+            } catch (e) {
+              resolve(false);
+            }
           });
         } catch (e) {
           return false;
@@ -935,12 +989,17 @@
 
       const idbGetAttachment = async (id) => {
         try {
-          const db = await openAttachmentDb();
-          return await new Promise((resolve, reject) => {
-            const tx = db.transaction('files', 'readonly');
-            const req = tx.objectStore('files').get(id);
-            req.onsuccess = () => resolve(req.result || null);
-            req.onerror = () => reject(req.error);
+          const db = await openAttDb();
+          if (!db) return null;
+          return await new Promise((resolve) => {
+            try {
+              const tx = db.transaction('files', 'readonly');
+              const req = tx.objectStore('files').get(id);
+              req.onsuccess = () => resolve(req.result || null);
+              req.onerror = () => resolve(null);
+            } catch (e) {
+              resolve(null);
+            }
           });
         } catch (e) {
           return null;
@@ -950,12 +1009,17 @@
       const idbDeleteAttachment = async (id) => {
         if (!id) return;
         try {
-          const db = await openAttachmentDb();
+          const db = await openAttDb();
+          if (!db) return;
           await new Promise((resolve) => {
-            const tx = db.transaction('files', 'readwrite');
-            tx.objectStore('files').delete(id);
-            tx.oncomplete = () => resolve(true);
-            tx.onerror = () => resolve(false);
+            try {
+              const tx = db.transaction('files', 'readwrite');
+              tx.objectStore('files').delete(id);
+              tx.oncomplete = () => resolve(true);
+              tx.onerror = () => resolve(false);
+            } catch (e) {
+              resolve(false);
+            }
           });
         } catch (e) {}
       };
@@ -1166,12 +1230,14 @@
 
       // ── Full-Screen Attachment Lightbox Viewer ───────────────────────────
       const closeAttachmentLightbox = () => {
-        const overlay = document.getElementById('tdi-lightbox-overlay');
+        const overlay = document.getElementById('tdi-att-modal');
         const imgEl   = document.getElementById('tdi-lb-img');
         const pdfEl   = document.getElementById('tdi-lb-pdf');
-        if (overlay) overlay.classList.add('hidden');
-        if (imgEl) { imgEl.classList.add('hidden'); imgEl.src = ''; }
-        if (pdfEl) { pdfEl.classList.add('hidden'); pdfEl.src = ''; }
+        const loader  = document.getElementById('tdi-lb-loader');
+        if (overlay) overlay.classList.remove('open');
+        if (loader) loader.textContent = '';
+        if (imgEl) { imgEl.classList.add('hidden'); imgEl.removeAttribute('src'); }
+        if (pdfEl) { pdfEl.classList.add('hidden'); pdfEl.removeAttribute('src'); }
         if (activeLightboxUrl) {
           URL.revokeObjectURL(activeLightboxUrl);
           activeLightboxUrl = null;
@@ -1185,7 +1251,7 @@
         const att = t.attachment;
         activeLightboxTrade = t;
 
-        const overlay = document.getElementById('tdi-lightbox-overlay');
+        const overlay = document.getElementById('tdi-att-modal');
         const titleEl = document.getElementById('tdi-lb-title');
         const subEl   = document.getElementById('tdi-lb-sub');
         const loader  = document.getElementById('tdi-lb-loader');
@@ -1201,7 +1267,7 @@
         imgEl.classList.add('hidden');
         pdfEl.classList.add('hidden');
         syncBtn.classList.toggle('hidden', Boolean(att.synced));
-        overlay.classList.remove('hidden');
+        overlay.classList.add('open');
 
         if (activeLightboxUrl) {
           URL.revokeObjectURL(activeLightboxUrl);
@@ -1561,6 +1627,12 @@
         const brk  = String(broker || '').trim();
         if (!hasMatchingBondTrade(symU, brk)) return [];
         return sortLatestFirst(bondInterests).filter(item => {
+          if (String(item.symbol || '').trim().toUpperCase() !== symU) return false;
+          if (brk && item.broker && String(item.broker).trim() !== brk) return false;
+          return true;
+        });
+      };
+
       // ── Delete Trade & Clean Associated Bond Interest & Attachment ───────
       const deleteTradeById = (id) => {
         const target = trades.find(x => String(x.id) === String(id));
@@ -2312,6 +2384,9 @@
                   <span class="text-[11px] text-slate-300 truncate">${esc(t.notes || '')}</span>
                 </div>
                 <div class="flex gap-1.5 shrink-0">
+                  ${isBond ? `<button type="button" data-addint="${esc(t.symbol)}" data-ibrk="${esc(t.broker)}" class="px-2.5 py-1 rounded-lg bg-amber-900 border border-amber-500 text-amber-100 text-[11px] font-bold">+ Int</button>` : ''}
+                  <button type="button" data-edit="${esc(t.id)}" class="px-2.5 py-1 rounded-lg bg-violet-900 border border-violet-600 text-white text-[11px] font-bold">✎</button>
+                  <button type="button" data-del="${esc(t.id)}" class="px-2.5 py-1 rounded-lg bg-red-900 border border-red-600 text-white text-[11px] font-bold">✕</button>
                 </div>
               </div>
               ${expandedIntHtml}
@@ -3151,6 +3226,14 @@
         });
 
         document.getElementById('tdi-lb-close').addEventListener('click', closeAttachmentLightbox);
+        document.getElementById('tdi-att-modal').addEventListener('click', (e) => {
+          if (e.target === e.currentTarget || e.target.id === 'tdi-lb-body') {
+            closeAttachmentLightbox();
+          }
+        });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') closeAttachmentLightbox();
+        });
         document.getElementById('tdi-lb-sync-btn').addEventListener('click', async () => {
           if (!activeLightboxTrade || !activeLightboxTrade.attachment) return;
           if (!gistConfig.token || !parseOwnerRepo()) {
@@ -3312,14 +3395,26 @@
         window.addEventListener('focus', checkRemoteGistForUpdates);
       };
 
-      // ── Initialize App ───────────────────────────────────────────────────
-      wireEvents();
-      refreshAllSelects();
-      updateFormMode();
-      updateSyncVisuals();
-      renderSettingsLists();
-      renderAll();
-      checkRemoteGistForUpdates();
+      // ── Safe Synchronous Startup ─────────────────────────────────────────
+      const startApp = () => {
+        try {
+          wireEvents();
+          refreshAllSelects();
+          updateFormMode();
+          updateSyncVisuals();
+          renderSettingsLists();
+          renderAll();
+          checkRemoteGistForUpdates();
+        } catch (err) {
+          console.error('Trade Diary startup error:', err);
+        }
+      };
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', startApp);
+      } else {
+        startApp();
+      }
     })();
   </script>
 </body>
