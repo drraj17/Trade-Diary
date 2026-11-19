@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
@@ -385,9 +386,20 @@
           </div>
 
           <div id="wrap-notes" class="flex flex-col gap-1 sm:col-span-2 md:col-span-2">
-            <label class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Notes</label>
-            <input id="t-notes" type="text" placeholder="Notes..."
-              class="w-full bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 outline-none" />
+            <label class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Notes &amp; Chart / PDF Attachment</label>
+            <div class="flex items-center gap-1.5">
+              <input id="t-notes" type="text" placeholder="Notes..."
+                class="flex-1 min-w-0 bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 outline-none" />
+              <label for="t-attach-input" title="Attach Chart Image or PDF"
+                class="shrink-0 cursor-pointer px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sky-300 font-bold text-xs flex items-center gap-1 active:scale-95 transition">
+                <span>📎</span><span class="hidden sm:inline">Attach</span>
+              </label>
+              <input id="t-attach-input" type="file" accept="image/*,.pdf,application/pdf" class="hidden" />
+            </div>
+            <div id="t-attach-preview" class="hidden items-center justify-between gap-2 px-2.5 py-1.5 mt-1 rounded-xl bg-sky-950/60 border border-sky-500/40 text-[11px] text-sky-100">
+              <span id="t-attach-name" class="truncate font-semibold"></span>
+              <button type="button" id="t-attach-clear" class="shrink-0 px-2 py-0.5 rounded bg-rose-900/90 hover:bg-rose-800 text-rose-100 font-bold text-[10px]">✕</button>
+            </div>
           </div>
 
           <div class="sm:col-span-2 md:col-span-4 flex items-center justify-between gap-2 pt-1">
@@ -549,7 +561,7 @@
       <!-- GitHub Gist Sync -->
       <section class="bg-[#111827] border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
         <div class="flex items-center justify-between flex-wrap gap-2 font-bold text-xs text-[#38bdf8]">
-          <span>☁️ GitHub Gist Sync</span>
+          <span>☁️ GitHub Gist &amp; Private Attachments Repo</span>
           <div class="flex gap-2">
             <button type="button" id="gist-pull-btn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs">
               ⬇️ Pull
@@ -559,16 +571,23 @@
             </button>
           </div>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <input id="gh-token" type="password" placeholder="GitHub Token"
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <input id="gh-token" type="password" placeholder="GitHub Token (gist + repo)"
             class="bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 outline-none" />
           <input id="gh-gist-id" type="text" placeholder="Gist ID"
             class="bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 outline-none" />
+          <input id="gh-attach-repo" type="text" placeholder="Attachments Repo (owner/repo)"
+            class="bg-[#090d16] border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-slate-100 outline-none" />
         </div>
         <div class="flex items-center justify-between flex-wrap gap-2">
-          <button type="button" id="gh-save-btn" class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 text-white font-bold text-xs">
-            Save
-          </button>
+          <div class="flex items-center gap-2">
+            <button type="button" id="gh-save-btn" class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 text-white font-bold text-xs">
+              Save
+            </button>
+            <button type="button" id="gh-test-repo-btn" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sky-300 font-bold text-xs">
+              Test Repo
+            </button>
+          </div>
           <span id="tdi-last-sync-lbl" class="text-[11px] text-slate-400"></span>
         </div>
       </section>
@@ -603,31 +622,31 @@
   <!-- ==================== MOBILE BOTTOM NAVIGATION BAR (<= 768px) ==================== -->
   <nav class="md:hidden fixed bottom-0 inset-x-0 z-40 bottom-nav-safe bg-[#0f172a]/95 backdrop-blur-md border-t border-slate-800 px-3 pt-1.5 flex items-center justify-around" aria-label="Mobile Navigation">
     <button type="button" data-tab="main" class="tdi-tab-mobile flex flex-col items-center gap-0.5 py-1.5 px-4 text-sky-400 font-bold text-[11px]">
-      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
-      <span>Main</span>
-    </button>
-
-    <!-- Centered Elevated + Button -->
-    <button type="button" id="tdi-mobile-fab" title="Add Entry"
-      class="-mt-6 w-14 h-14 rounded-full bg-gradient-to-br from-sky-500 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-sky-500/40 border-4 border-[#090d16] active:scale-95 transition">
-      <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round">
-        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-      </svg>
-    </button>
-
-    <button type="button" data-tab="trades" class="tdi-tab-mobile flex flex-col items-center gap-0.5 py-1.5 px-4 text-slate-400 font-semibold text-[11px]">
-      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-      <span>Trades (<span class="tdi-tab-count">0</span>)</span>
-    </button>
-
-    <button type="button" data-tab="settings" class="tdi-tab-mobile flex flex-col items-center gap-0.5 py-1.5 px-4 text-slate-400 font-semibold text-[11px]">
-      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
-      <span>Settings</span>
-    </button>
-  </nav>
-
-  <!-- ==================== FLOATING AUTOCOMPLETE DROPDOWN ==================== -->
-  <div id="tdi-sym-dropdown" class="hidden fixed z-50 bg-slate-800 border border-sky-400 rounded-xl max-h-56 overflow-y-auto shadow-2xl text-xs text-slate-50 divide-y divide-slate-700"></div>
+  <!-- ==================== FULL-SCREEN ATTACHMENT LIGHTBOX VIEWER ==================== -->
+  <div id="tdi-lightbox-overlay" class="hidden fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex flex-col">
+    <div class="header-safe flex items-center justify-between gap-2 px-3 sm:px-6 py-2.5 bg-[#0f172a] border-b border-slate-800 shrink-0">
+      <div class="min-w-0">
+        <div id="tdi-lb-title" class="text-xs sm:text-sm font-extrabold text-slate-50 truncate">Attachment</div>
+        <div id="tdi-lb-sub" class="text-[11px] text-slate-400 truncate"></div>
+      </div>
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button type="button" id="tdi-lb-sync-btn" class="hidden px-2.5 py-1.5 rounded-xl bg-amber-900 hover:bg-amber-800 border border-amber-500 text-amber-100 font-bold text-xs">
+          ☁️ Retry Sync
+        </button>
+        <a id="tdi-lb-download" href="#" download="attachment" class="px-3 py-1.5 rounded-xl bg-sky-700 hover:bg-sky-600 text-white font-bold text-xs">
+          ⬇️ Download
+        </a>
+        <button type="button" id="tdi-lb-close" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs">
+          ✕
+        </button>
+      </div>
+    </div>
+    <div id="tdi-lb-body" class="flex-1 min-h-0 overflow-auto p-3 sm:p-6 flex items-center justify-center">
+      <div id="tdi-lb-loader" class="text-xs font-semibold text-sky-300">Loading attachment...</div>
+      <img id="tdi-lb-img" src="" alt="Trade Attachment" class="hidden max-w-full max-h-[82vh] object-contain rounded-xl shadow-2xl border border-slate-800" />
+      <iframe id="tdi-lb-pdf" src="" title="PDF Attachment" class="hidden w-full h-[80vh] rounded-xl border border-slate-800 bg-white"></iframe>
+    </div>
+  </div>
 
   <!-- ==================== CUSTOM MODAL DIALOG (NO ALERT / CONFIRM) ==================== -->
   <div id="tdi-dialog-overlay" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
@@ -708,7 +727,9 @@
       let segments      = lsGet('tdi_segments', DEFAULT_SEGMENTS.slice());
       let brokers       = lsGet('tdi_brokers', DEFAULT_BROKERS.slice());
       let priceCache    = lsGet('tdi_price_cache', {});
-      let gistConfig    = lsGet('tdi_gist_config', { token: '', gistId: '' });
+      let gistConfig    = lsGet('tdi_gist_config', { token: '', gistId: '', attachmentsRepo: '' });
+      if (!gistConfig || typeof gistConfig !== 'object') gistConfig = { token: '', gistId: '', attachmentsRepo: '' };
+      if (typeof gistConfig.attachmentsRepo !== 'string') gistConfig.attachmentsRepo = '';
       let hasUnsynced   = lsGet('tdi_unsynced', false);
       let lastSyncedAt  = lsGet('tdi_last_synced_at', '');
 
@@ -728,6 +749,9 @@
       let expandedBonds        = new Set();
       let interestModalTarget  = null;
       let remotePendingPayload = null;
+      let pendingAttachment    = null; // { id, name, mime, path, size, blob, synced, removed }
+      let activeLightboxUrl    = null;
+      let activeLightboxTrade  = null;
 
       let filters = {
         year:    lsGet('tdi_filter_year', 'all'),
@@ -872,6 +896,355 @@
           currency: 'INR',
           maximumFractionDigits: 2
         }).format(n);
+      };
+
+      const formatBytes = (bytes) => {
+        const b = Number(bytes) || 0;
+        if (b < 1024) return `${b} B`;
+        if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} KB`;
+        return `${(b / (1024 * 1024)).toFixed(2)} MB`;
+      };
+
+      // ── IndexedDB Local Attachment Cache (tdi_attachments_db) ────────────
+      const openAttachmentDb = () => new Promise((resolve, reject) => {
+        if (!window.indexedDB) return reject(new Error('IndexedDB unavailable'));
+        const req = indexedDB.open('tdi_attachments_db', 1);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('files')) {
+            db.createObjectStore('files', { keyPath: 'id' });
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+
+      const idbPutAttachment = async (id, blob, meta = {}) => {
+        try {
+          const db = await openAttachmentDb();
+          return await new Promise((resolve, reject) => {
+            const tx = db.transaction('files', 'readwrite');
+            tx.objectStore('files').put({ id, blob, ...meta, cachedAt: Date.now() });
+            tx.oncomplete = () => resolve(true);
+            tx.onerror = () => reject(tx.error);
+          });
+        } catch (e) {
+          return false;
+        }
+      };
+
+      const idbGetAttachment = async (id) => {
+        try {
+          const db = await openAttachmentDb();
+          return await new Promise((resolve, reject) => {
+            const tx = db.transaction('files', 'readonly');
+            const req = tx.objectStore('files').get(id);
+            req.onsuccess = () => resolve(req.result || null);
+            req.onerror = () => reject(req.error);
+          });
+        } catch (e) {
+          return null;
+        }
+      };
+
+      const idbDeleteAttachment = async (id) => {
+        if (!id) return;
+        try {
+          const db = await openAttachmentDb();
+          await new Promise((resolve) => {
+            const tx = db.transaction('files', 'readwrite');
+            tx.objectStore('files').delete(id);
+            tx.oncomplete = () => resolve(true);
+            tx.onerror = () => resolve(false);
+          });
+        } catch (e) {}
+      };
+
+      // ── Offscreen Image Compression & Base64 Conversion ──────────────────
+      const compressImageFile = (file, maxDim = 1600, quality = 0.82) => new Promise((resolve, reject) => {
+        const img = new Image();
+        const objUrl = URL.createObjectURL(file);
+        img.onload = () => {
+          URL.revokeObjectURL(objUrl);
+          let w = img.naturalWidth || img.width;
+          let h = img.naturalHeight || img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w >= h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, w, h);
+          ctx.drawImage(img, 0, 0, w, h);
+          canvas.toBlob((blob) => {
+            if (!blob) return reject(new Error('Image compression failed'));
+            resolve(blob);
+          }, 'image/jpeg', quality);
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(objUrl);
+          reject(new Error('Invalid image'));
+        };
+        img.src = objUrl;
+      });
+
+      const blobToBase64 = (blob) => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const res = String(reader.result || '');
+          const idx = res.indexOf(',');
+          resolve(idx >= 0 ? res.slice(idx + 1) : res);
+        };
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(blob);
+      });
+
+      const base64ToBlob = (b64, mime = 'application/octet-stream') => {
+        const clean = String(b64 || '').replace(/\s+/g, '');
+        const binStr = atob(clean);
+        const len = binStr.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) bytes[i] = binStr.charCodeAt(i);
+        return new Blob([bytes], { type: mime });
+      };
+
+      // ── Private GitHub Repository Attachment Cloud Sync ──────────────────
+      const parseOwnerRepo = () => {
+        const raw = String(gistConfig.attachmentsRepo || '').trim()
+          .replace(/^https?:\/\/github\.com\//i, '')
+          .replace(/\.git$/i, '')
+          .replace(/^\/+|\/+$/g, '');
+        const parts = raw.split('/');
+        if (parts.length !== 2 || !parts[0] || !parts[1]) return null;
+        return { owner: parts[0], repo: parts[1], full: `${parts[0]}/${parts[1]}` };
+      };
+
+      const uploadAttachmentToRepo = async (attMeta, blob) => {
+        const repoInfo = parseOwnerRepo();
+        if (!gistConfig.token || !repoInfo || !attMeta || !blob) return false;
+        try {
+          const apiUrl = `https://api.github.com/repos/${encodeURIComponent(repoInfo.owner)}/${encodeURIComponent(repoInfo.repo)}/contents/attachments/${encodeURIComponent(attMeta.path)}`;
+          let existingSha = null;
+          try {
+            const checkRes = await fetch(apiUrl, {
+              headers: {
+                'Authorization': `Bearer ${gistConfig.token}`,
+                'Accept': 'application/vnd.github+json',
+                'X-GitHub-Api-Version': '2022-11-28'
+              }
+            });
+            if (checkRes.ok) {
+              const info = await checkRes.json();
+              if (info && info.sha) existingSha = info.sha;
+            }
+          } catch (e) {}
+
+          const contentB64 = await blobToBase64(blob);
+          const payload = {
+            message: `Attachment: ${attMeta.name || attMeta.path}`,
+            content: contentB64
+          };
+          if (existingSha) payload.sha = existingSha;
+
+          const putRes = await fetch(apiUrl, {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${gistConfig.token}`,
+              'Accept': 'application/vnd.github+json',
+              'X-GitHub-Api-Version': '2022-11-28',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
+          return putRes.ok;
+        } catch (e) {
+          return false;
+        }
+      };
+
+      const fetchAttachmentFromRepo = async (attMeta) => {
+        const repoInfo = parseOwnerRepo();
+        if (!gistConfig.token || !repoInfo || !attMeta?.path) return null;
+        const apiUrl = `https://api.github.com/repos/${encodeURIComponent(repoInfo.owner)}/${encodeURIComponent(repoInfo.repo)}/contents/attachments/${encodeURIComponent(attMeta.path)}`;
+        try {
+          const res = await fetch(apiUrl, {
+            headers: {
+              'Authorization': `Bearer ${gistConfig.token}`,
+              'Accept': 'application/vnd.github+json',
+              'X-GitHub-Api-Version': '2022-11-28'
+            }
+          });
+          if (!res.ok) return null;
+          const data = await res.json();
+          if (data && data.content) {
+            return base64ToBlob(data.content, attMeta.mime || 'application/octet-stream');
+          }
+          if (data && data.download_url) {
+            const rawRes = await fetch(data.download_url, {
+              headers: { 'Authorization': `Bearer ${gistConfig.token}` }
+            });
+            if (rawRes.ok) return await rawRes.blob();
+          }
+          return null;
+        } catch (e) {
+          return null;
+        }
+      };
+
+      const deleteAttachmentFromRepo = async (attMeta) => {
+        const repoInfo = parseOwnerRepo();
+        if (!gistConfig.token || !repoInfo || !attMeta?.path) return false;
+        const apiUrl = `https://api.github.com/repos/${encodeURIComponent(repoInfo.owner)}/${encodeURIComponent(repoInfo.repo)}/contents/attachments/${encodeURIComponent(attMeta.path)}`;
+        try {
+          const checkRes = await fetch(apiUrl, {
+            headers: {
+              'Authorization': `Bearer ${gistConfig.token}`,
+              'Accept': 'application/vnd.github+json',
+              'X-GitHub-Api-Version': '2022-11-28'
+            }
+          });
+          if (!checkRes.ok) return false;
+          const info = await checkRes.json();
+          if (!info?.sha) return false;
+
+          const delRes = await fetch(apiUrl, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${gistConfig.token}`,
+              'Accept': 'application/vnd.github+json',
+              'X-GitHub-Api-Version': '2022-11-28',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              message: `Delete attachment: ${attMeta.name || attMeta.path}`,
+              sha: info.sha
+            })
+          });
+          return delRes.ok;
+        } catch (e) {
+          return false;
+        }
+      };
+
+      const renderAttachmentPreviewChip = () => {
+        const box = document.getElementById('t-attach-preview');
+        const lbl = document.getElementById('t-attach-name');
+        if (!box || !lbl) return;
+        if (!pendingAttachment || pendingAttachment.removed) {
+          box.classList.add('hidden');
+          box.classList.remove('flex');
+          lbl.textContent = '';
+          return;
+        }
+        const icon = String(pendingAttachment.mime || '').includes('pdf') ? '📄' : '🖼️';
+        const syncTag = pendingAttachment.synced ? '☁️ Synced' : '📱 Local';
+        lbl.textContent = `${icon} ${pendingAttachment.name} (${formatBytes(pendingAttachment.size)}) · ${syncTag}`;
+        box.classList.remove('hidden');
+        box.classList.add('flex');
+      };
+
+      const buildAttachmentBadgeHtml = (t) => {
+        if (!t || !t.attachment || !t.attachment.id) return '';
+        const isPdf = String(t.attachment.mime || '').includes('pdf') || /\.pdf$/i.test(t.attachment.name || '');
+        const label = isPdf ? '📎 PDF' : '📎 Chart';
+        const dotCls = t.attachment.synced ? 'bg-emerald-400' : 'bg-amber-400';
+        const dotTitle = t.attachment.synced ? 'Synced to Private Repo' : 'Saved Locally';
+        return `<button type="button" data-open-att="${esc(t.id)}" title="${esc(t.attachment.name || 'Attachment')} (${dotTitle})"
+          class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-400/40 transition active:scale-95">
+          <span>${label}</span>
+          <span class="w-1.5 h-1.5 rounded-full ${dotCls}"></span>
+        </button>`;
+      };
+
+      // ── Full-Screen Attachment Lightbox Viewer ───────────────────────────
+      const closeAttachmentLightbox = () => {
+        const overlay = document.getElementById('tdi-lightbox-overlay');
+        const imgEl   = document.getElementById('tdi-lb-img');
+        const pdfEl   = document.getElementById('tdi-lb-pdf');
+        if (overlay) overlay.classList.add('hidden');
+        if (imgEl) { imgEl.classList.add('hidden'); imgEl.src = ''; }
+        if (pdfEl) { pdfEl.classList.add('hidden'); pdfEl.src = ''; }
+        if (activeLightboxUrl) {
+          URL.revokeObjectURL(activeLightboxUrl);
+          activeLightboxUrl = null;
+        }
+        activeLightboxTrade = null;
+      };
+
+      const openAttachmentLightbox = async (tradeId) => {
+        const t = trades.find(x => String(x.id) === String(tradeId));
+        if (!t || !t.attachment) return;
+        const att = t.attachment;
+        activeLightboxTrade = t;
+
+        const overlay = document.getElementById('tdi-lightbox-overlay');
+        const titleEl = document.getElementById('tdi-lb-title');
+        const subEl   = document.getElementById('tdi-lb-sub');
+        const loader  = document.getElementById('tdi-lb-loader');
+        const imgEl   = document.getElementById('tdi-lb-img');
+        const pdfEl   = document.getElementById('tdi-lb-pdf');
+        const dlBtn   = document.getElementById('tdi-lb-download');
+        const syncBtn = document.getElementById('tdi-lb-sync-btn');
+
+        titleEl.textContent = `${t.symbol} · ${att.name || 'Attachment'}`;
+        subEl.textContent   = `${t.date || ''} · ${formatBytes(att.size)} · ${att.synced ? '☁️ Synced to Repo' : '📱 Local Cache'}`;
+        loader.textContent  = 'Loading attachment...';
+        loader.classList.remove('hidden');
+        imgEl.classList.add('hidden');
+        pdfEl.classList.add('hidden');
+        syncBtn.classList.toggle('hidden', Boolean(att.synced));
+        overlay.classList.remove('hidden');
+
+        if (activeLightboxUrl) {
+          URL.revokeObjectURL(activeLightboxUrl);
+          activeLightboxUrl = null;
+        }
+
+        let cached = await idbGetAttachment(att.id);
+        let blob = cached?.blob || null;
+
+        if (!blob) {
+          loader.textContent = 'Fetching from Private GitHub Repo...';
+          blob = await fetchAttachmentFromRepo(att);
+          if (blob) {
+            await idbPutAttachment(att.id, blob, { name: att.name, mime: att.mime });
+            if (!att.synced) {
+              att.synced = true;
+              saveTrades();
+              renderAll();
+            }
+          }
+        }
+
+        if (!blob) {
+          loader.textContent = 'Attachment not found locally or in cloud repo. Check Settings → Attachments Repo & Token.';
+          dlBtn.href = '#';
+          return;
+        }
+
+        const isPdf = String(att.mime || blob.type || '').includes('pdf') || /\.pdf$/i.test(att.name || '');
+        const typedBlob = blob.type ? blob : new Blob([blob], { type: isPdf ? 'application/pdf' : 'image/jpeg' });
+        activeLightboxUrl = URL.createObjectURL(typedBlob);
+
+        dlBtn.href = activeLightboxUrl;
+        dlBtn.download = att.name || (isPdf ? `${t.symbol}-note.pdf` : `${t.symbol}-chart.jpg`);
+        loader.classList.add('hidden');
+
+        if (isPdf) {
+          pdfEl.src = activeLightboxUrl;
+          pdfEl.classList.remove('hidden');
+        } else {
+          imgEl.src = activeLightboxUrl;
+          imgEl.classList.remove('hidden');
+        }
       };
 
       const normalizeSide = (s) => {
@@ -1188,16 +1561,16 @@
         const brk  = String(broker || '').trim();
         if (!hasMatchingBondTrade(symU, brk)) return [];
         return sortLatestFirst(bondInterests).filter(item => {
-          if (String(item.symbol || '').trim().toUpperCase() !== symU) return false;
-          if (brk && item.broker && String(item.broker).trim() !== brk) return false;
-          return true;
-        });
-      };
-
-      // ── Delete Trade & Clean Associated Bond Interest ────────────────────
+      // ── Delete Trade & Clean Associated Bond Interest & Attachment ───────
       const deleteTradeById = (id) => {
         const target = trades.find(x => String(x.id) === String(id));
         if (!target) return;
+
+        if (target.attachment && target.attachment.id) {
+          const attCopy = { ...target.attachment };
+          idbDeleteAttachment(attCopy.id);
+          if (attCopy.synced) deleteAttachmentFromRepo(attCopy);
+        }
 
         trades = trades.filter(x => String(x.id) !== String(id));
 
@@ -1255,8 +1628,9 @@
         const filterBar = document.getElementById('tdi-filterbar');
         if (tab === 'settings') {
           filterBar.classList.add('hidden');
-          document.getElementById('gh-token').value   = gistConfig.token || '';
-          document.getElementById('gh-gist-id').value = gistConfig.gistId || '';
+          document.getElementById('gh-token').value       = gistConfig.token || '';
+          document.getElementById('gh-gist-id').value     = gistConfig.gistId || '';
+          document.getElementById('gh-attach-repo').value = gistConfig.attachmentsRepo || '';
           const lbl = document.getElementById('tdi-last-sync-lbl');
           if (lbl) lbl.textContent = lastSyncedAt ? `Last synced: ${new Date(lastSyncedAt).toLocaleString()}` : '';
           renderSettingsLists();
@@ -1665,6 +2039,7 @@
                     <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase bg-purple-500/15 text-purple-300 border border-purple-500/30">${esc(t.broker || '—')}</span>
                     <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase ${side === 'BUY' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'}">${sideBadge(side)}</span>
                     ${t.interest ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-yellow-500/15 text-yellow-300 border border-yellow-500/30">${esc(t.interest)}%</span>` : ''}
+                    ${buildAttachmentBadgeHtml(t)}
                   </div>
                   <div class="text-[11px] text-slate-400 mt-1">
                     ${esc(t.date)} · Qty <b>${esc(t.qty)}</b> @ <b>₹${esc(t.entry)}</b> ${t.notes ? `· ${esc(t.notes)}` : ''}
@@ -1860,7 +2235,12 @@
               <td class="py-2 px-3 whitespace-nowrap">${exitOrInt}</td>
               <td class="py-2 px-3 whitespace-nowrap">₹${esc(t.fees || 0)}</td>
               <td class="py-2 px-3 whitespace-nowrap">${netHtml}</td>
-              <td title="${esc(t.notes || '')}" class="py-2 px-3 max-w-[140px] truncate">${esc(t.notes || '')}</td>
+              <td title="${esc(t.notes || '')}" class="py-2 px-3 max-w-[180px] truncate">
+                <div class="flex items-center gap-1.5">
+                  ${buildAttachmentBadgeHtml(t)}
+                  <span class="truncate">${esc(t.notes || '')}</span>
+                </div>
+              </td>
               <td class="py-2 px-3 whitespace-nowrap space-x-1">
                 ${isBond ? `<button type="button" data-addint="${esc(t.symbol)}" data-ibrk="${esc(t.broker)}" class="px-2 py-1 rounded bg-amber-900 border border-amber-500 text-amber-100 text-[11px] font-bold">+Int</button>` : ''}
                 <button type="button" data-edit="${esc(t.id)}" class="px-2 py-1 rounded bg-violet-900 border border-violet-600 text-white text-[11px] font-bold">✎</button>
@@ -1927,11 +2307,11 @@
                 <div>Qty <b>${esc(t.qty)}</b> · In <b>₹${esc(t.entry)}</b> ${open ? '' : `→ <b>₹${esc(t.exit)}</b>`}</div>
               </div>
               <div class="flex items-center justify-between mt-0.5">
-                <span class="text-[11px] text-slate-300 truncate max-w-[60%]">${esc(t.notes || '')}</span>
-                <div class="flex gap-1.5">
-                  ${isBond ? `<button type="button" data-addint="${esc(t.symbol)}" data-ibrk="${esc(t.broker)}" class="px-2.5 py-1 rounded-lg bg-amber-900 border border-amber-500 text-amber-100 font-bold text-[11px]">+ Int</button>` : ''}
-                  <button type="button" data-edit="${esc(t.id)}" class="px-2.5 py-1 rounded-lg bg-violet-900 border border-violet-600 text-white font-bold text-[11px]">✎</button>
-                  <button type="button" data-del="${esc(t.id)}" class="px-2.5 py-1 rounded-lg bg-red-900 border border-red-600 text-white font-bold text-[11px]">✕</button>
+                <div class="flex items-center gap-1.5 min-w-0 max-w-[65%]">
+                  ${buildAttachmentBadgeHtml(t)}
+                  <span class="text-[11px] text-slate-300 truncate">${esc(t.notes || '')}</span>
+                </div>
+                <div class="flex gap-1.5 shrink-0">
                 </div>
               </div>
               ${expandedIntHtml}
@@ -2243,6 +2623,9 @@
         document.getElementById('t-exit').value     = (t.exit == null || t.exit === '') ? '' : t.exit;
         document.getElementById('t-fees').value     = t.fees ?? 0;
         document.getElementById('t-notes').value    = t.notes || '';
+        document.getElementById('t-attach-input').value = '';
+        pendingAttachment = t.attachment ? { ...t.attachment, isExisting: true, removed: false } : null;
+        renderAttachmentPreviewChip();
         updateFormMode();
         document.getElementById('tdi-form-submit').textContent = 'Update';
         document.getElementById('tdi-form-cancel').classList.remove('hidden');
@@ -2255,6 +2638,9 @@
         ['t-sym', 't-notes', 't-exit', 't-qty', 't-entry', 't-interest'].forEach(id => {
           document.getElementById(id).value = '';
         });
+        document.getElementById('t-attach-input').value = '';
+        pendingAttachment = null;
+        renderAttachmentPreviewChip();
         document.getElementById('t-fees').value = '0';
         document.getElementById('t-side').value = 'BUY';
         document.getElementById('t-date').valueAsDate = new Date();
@@ -2285,6 +2671,10 @@
         if (Array.isArray(parsed.symbols))       symbols = parsed.symbols;
         if (Array.isArray(parsed.segments) && parsed.segments.length) segments = parsed.segments;
         if (Array.isArray(parsed.brokers))       brokers = parsed.brokers;
+        if (parsed.attachmentsRepo && !gistConfig.attachmentsRepo) {
+          gistConfig.attachmentsRepo = String(parsed.attachmentsRepo).trim();
+          saveConfig();
+        }
 
         pruneOrphanedBondInterests(false);
 
@@ -2343,6 +2733,7 @@
         const content = JSON.stringify({
           deviceId,
           updatedAt: nowIso,
+          attachmentsRepo: gistConfig.attachmentsRepo || '',
           trades,
           bondInterests,
           symbols,
@@ -2565,7 +2956,7 @@
         });
 
         // Submit Trade
-        document.getElementById('tdi-trade-form').addEventListener('submit', (e) => {
+        document.getElementById('tdi-trade-form').addEventListener('submit', async (e) => {
           e.preventDefault();
           const exitRaw  = document.getElementById('t-exit').value.trim();
           const intRaw   = document.getElementById('t-interest').value.trim();
@@ -2578,30 +2969,64 @@
             return setStatus('Enter symbol, qty & price', true);
           }
 
+          let finalAttachment = null;
+          let newBlobToSync = null;
+
+          if (pendingAttachment && !pendingAttachment.removed) {
+            if (pendingAttachment.blob) {
+              const ext = String(pendingAttachment.mime || '').includes('pdf') ? 'pdf' : 'jpg';
+              const cleanSym = symbol.replace(/[^A-Z0-9_-]/g, '_');
+              const attId = pendingAttachment.id || `att_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+              const attPath = `${cleanSym}_${attId}.${ext}`;
+              finalAttachment = {
+                id: attId,
+                name: pendingAttachment.name || `${symbol}.${ext}`,
+                mime: pendingAttachment.mime || (ext === 'pdf' ? 'application/pdf' : 'image/jpeg'),
+                path: attPath,
+                size: pendingAttachment.size || pendingAttachment.blob.size,
+                synced: false
+              };
+              newBlobToSync = pendingAttachment.blob;
+              await idbPutAttachment(attId, newBlobToSync, { name: finalAttachment.name, mime: finalAttachment.mime });
+            } else if (pendingAttachment.isExisting) {
+              const { isExisting, removed, blob, ...cleanMeta } = pendingAttachment;
+              finalAttachment = cleanMeta;
+            }
+          }
+
           const data = {
-            date:     document.getElementById('t-date').value || new Date().toISOString().slice(0, 10),
+            date:       document.getElementById('t-date').value || new Date().toISOString().slice(0, 10),
             symbol,
-            segment:  document.getElementById('t-seg').value,
-            broker:   document.getElementById('t-broker').value,
+            segment:    document.getElementById('t-seg').value,
+            broker:     document.getElementById('t-broker').value,
             side,
-            style:    document.getElementById('t-style').value,
-            qty:      qtyVal,
-            entry:    entryVal,
-            interest: intRaw === '' ? '' : parseFloat(intRaw),
-            exit:     exitRaw === '' ? null : roundAmt(parseFloat(exitRaw)),
-            fees:     roundAmt(parseFloat(document.getElementById('t-fees').value) || 0),
-            notes:    document.getElementById('t-notes').value.trim()
+            style:      document.getElementById('t-style').value,
+            qty:        qtyVal,
+            entry:      entryVal,
+            interest:   intRaw === '' ? '' : parseFloat(intRaw),
+            exit:       exitRaw === '' ? null : roundAmt(parseFloat(exitRaw)),
+            fees:       roundAmt(parseFloat(document.getElementById('t-fees').value) || 0),
+            notes:      document.getElementById('t-notes').value.trim(),
+            attachment: finalAttachment
           };
 
           if (!symbols.some(s => s.symbol === data.symbol)) {
             addSymbolsFromString(data.symbol, data.segment);
           }
 
+          let savedTradeRef = null;
+
           if (editingId != null) {
             const idx = trades.findIndex(t => String(t.id) === String(editingId));
             if (idx >= 0) {
               const prev = trades[idx];
+              if (prev.attachment && (!finalAttachment || prev.attachment.id !== finalAttachment.id)) {
+                const oldAtt = { ...prev.attachment };
+                idbDeleteAttachment(oldAtt.id);
+                if (oldAtt.synced) deleteAttachmentFromRepo(oldAtt);
+              }
               trades[idx] = { ...prev, ...data };
+              savedTradeRef = trades[idx];
               if (isBondSegment(prev.segment) && isBondSegment(data.segment)) {
                 bondInterests.forEach(bi => {
                   if (String(bi.symbol || '').toUpperCase() === String(prev.symbol || '').toUpperCase() &&
@@ -2620,31 +3045,132 @@
           } else if (data.side === 'SELL') {
             const matched = processAutoSellMatch(data);
             if (!matched) {
-              trades.push({ id: Date.now(), ...data, exit: null });
+              savedTradeRef = { id: Date.now(), ...data, exit: null };
+              trades.push(savedTradeRef);
               setStatus(`Saved ${data.symbol} sell`);
             }
             ['t-sym', 't-notes', 't-exit', 't-qty', 't-entry', 't-interest'].forEach(id => {
               document.getElementById(id).value = '';
             });
+            document.getElementById('t-attach-input').value = '';
+            pendingAttachment = null;
+            renderAttachmentPreviewChip();
             document.getElementById('t-side').value = 'BUY';
             updateFormMode();
             setEntryOpen(false);
           } else {
-            trades.push({ id: Date.now(), ...data });
+            savedTradeRef = { id: Date.now(), ...data };
+            trades.push(savedTradeRef);
             ['t-sym', 't-notes', 't-exit', 't-qty', 't-entry', 't-interest'].forEach(id => {
               document.getElementById(id).value = '';
             });
+            document.getElementById('t-attach-input').value = '';
+            pendingAttachment = null;
+            renderAttachmentPreviewChip();
             setStatus('Saved');
             setEntryOpen(false);
           }
 
           saveTrades();
           renderAll();
+
+          if (newBlobToSync && finalAttachment && parseOwnerRepo() && gistConfig.token) {
+            setStatus('Uploading file...');
+            const uploaded = await uploadAttachmentToRepo(finalAttachment, newBlobToSync);
+            if (uploaded) {
+              if (savedTradeRef && savedTradeRef.attachment) {
+                savedTradeRef.attachment.synced = true;
+              }
+              saveTrades();
+              renderAll();
+              setStatus('File Synced!');
+            } else {
+              setStatus('Saved locally (Sync failed)', true);
+            }
+          }
         });
 
         document.getElementById('tdi-form-cancel').addEventListener('click', () => {
           cancelEdit();
           setEntryOpen(false);
+        });
+
+        // Attachment File Picker & Clear
+        document.getElementById('t-attach-input').addEventListener('change', async (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+          const isImg = file.type.startsWith('image/');
+          if (!isPdf && !isImg) {
+            e.target.value = '';
+            return setStatus('Only Images or PDFs allowed', true);
+          }
+          if (isPdf && file.size > 15 * 1024 * 1024) {
+            e.target.value = '';
+            return setStatus('PDF exceeds 15 MB limit', true);
+          }
+
+          try {
+            setStatus(isImg ? 'Compressing image...' : 'Preparing PDF...');
+            const finalBlob = isImg ? await compressImageFile(file, 1600, 0.82) : file;
+            const prevExisting = pendingAttachment?.isExisting ? pendingAttachment : null;
+            pendingAttachment = {
+              id: `att_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+              name: isImg ? file.name.replace(/\.[^.]+$/, '.jpg') : file.name,
+              mime: isImg ? 'image/jpeg' : 'application/pdf',
+              size: finalBlob.size,
+              blob: finalBlob,
+              synced: false,
+              replacedOld: prevExisting
+            };
+            renderAttachmentPreviewChip();
+            setStatus(`Attached (${formatBytes(finalBlob.size)})`);
+          } catch (err) {
+            setStatus('Attachment error', true);
+          }
+        });
+
+        document.getElementById('t-attach-clear').addEventListener('click', () => {
+          document.getElementById('t-attach-input').value = '';
+          if (pendingAttachment?.isExisting) {
+            pendingAttachment = { ...pendingAttachment, removed: true };
+          } else {
+            pendingAttachment = null;
+          }
+          renderAttachmentPreviewChip();
+        });
+
+        // Delegated Click for Attachment Badges + Lightbox Controls
+        document.addEventListener('click', (e) => {
+          const badge = e.target.closest('[data-open-att]');
+          if (badge) {
+            e.preventDefault();
+            e.stopPropagation();
+            openAttachmentLightbox(badge.dataset.openAtt);
+          }
+        });
+
+        document.getElementById('tdi-lb-close').addEventListener('click', closeAttachmentLightbox);
+        document.getElementById('tdi-lb-sync-btn').addEventListener('click', async () => {
+          if (!activeLightboxTrade || !activeLightboxTrade.attachment) return;
+          if (!gistConfig.token || !parseOwnerRepo()) {
+            return setStatus('Set Token & Repo in Settings', true);
+          }
+          const att = activeLightboxTrade.attachment;
+          const cached = await idbGetAttachment(att.id);
+          if (!cached?.blob) return setStatus('Local file missing', true);
+          setStatus('Syncing file...');
+          const ok = await uploadAttachmentToRepo(att, cached.blob);
+          if (ok) {
+            att.synced = true;
+            saveTrades();
+            renderAll();
+            document.getElementById('tdi-lb-sync-btn').classList.add('hidden');
+            document.getElementById('tdi-lb-sub').textContent = `${activeLightboxTrade.date || ''} · ${formatBytes(att.size)} · ☁️ Synced to Repo`;
+            setStatus('File Synced!');
+          } else {
+            setStatus('Upload failed', true);
+          }
         });
 
         // Settings
@@ -2693,13 +3219,44 @@
 
         document.getElementById('gh-save-btn').addEventListener('click', () => {
           gistConfig = {
-            token:  document.getElementById('gh-token').value.trim(),
-            gistId: document.getElementById('gh-gist-id').value.trim()
+            token:           document.getElementById('gh-token').value.trim(),
+            gistId:          document.getElementById('gh-gist-id').value.trim(),
+            attachmentsRepo: document.getElementById('gh-attach-repo').value.trim()
           };
           saveConfig();
           setStatus('Saved');
           checkRemoteGistForUpdates();
         });
+
+        document.getElementById('gh-test-repo-btn').addEventListener('click', async () => {
+          const token = document.getElementById('gh-token').value.trim();
+          const repoRaw = document.getElementById('gh-attach-repo').value.trim();
+          gistConfig.token = token;
+          gistConfig.attachmentsRepo = repoRaw;
+          saveConfig();
+
+          const info = parseOwnerRepo();
+          if (!token || !info) return setStatus('Enter Token & owner/repo', true);
+          setStatus('Testing repo...');
+          try {
+            const res = await fetch(`https://api.github.com/repos/${encodeURIComponent(info.owner)}/${encodeURIComponent(info.repo)}`, {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/vnd.github+json',
+                'X-GitHub-Api-Version': '2022-11-28'
+              }
+            });
+            if (res.ok) {
+              const repoJson = await res.json();
+              setStatus(`Connected (${repoJson.private ? 'Private' : 'Public'})`);
+            } else {
+              setStatus(`Repo Error (${res.status})`, true);
+            }
+          } catch (e) {
+            setStatus('Network error', true);
+          }
+        });
+
         document.getElementById('gist-push-btn').addEventListener('click', pushToGist);
         document.getElementById('gist-pull-btn').addEventListener('click', pullFromGist);
 
@@ -2767,3 +3324,4 @@
   </script>
 </body>
 </html>
+```
